@@ -1,0 +1,256 @@
+<!--suppress ALL, JSAnnotator -->
+<template>
+<div class="page" data-name="viewInv">
+    <div class="navbar" id="inventoryNavbar"><!-- Top Navbar -->
+        <div class="navbar-inner">
+            <div class="left">
+                <a href="#" class="link icon-only panel-open" data-panel="left">
+                    <i class="icon f7-icons">menu</i>
+                </a>
+                <a href="#" class="link back">
+                    <i class="icon icon-back"></i>
+                    <span class="ios-only">Назад</span>
+                </a>
+            </div>
+            <div class="title sliding">Инвентаризация<br>{{item.docID}} от {{item.docDate}}</div>
+            <div class="subnavbar"  id="inventorySubNavbar"><!--style="background-color: white; padding:0 15px 0 15px;"-->
+                <div class="block">
+                    <p class="row">
+                        <input type="number" name="name" id="barCodeInput"  placeholder="Штрихкод товара"><!--onblur="this.focus()"-->
+                        <span>
+                            <button class="col button button-outline button-round" id="enterRowButton" onclick="{{this.$options.enterRowButtonOnClick()}}">ВВОД</button><!--style="background-color: #2196f3; float:right"--><!--enterBarCode()-->
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--<div class="page" id="main_content-view" >-->
+    <!--</div>-->
+    <div class="page-content" id="pageContentInventory"><!--infinite-scroll-content-->
+        <!--<div class="block">-->
+        <!--<p class="row">-->
+        <!--<input  autofocus type="text" name="name" id="barCodeInput" onkeypress="onkeypressFunction(event.keyCode)" placeholder="Штрихкод товара">--><!--onblur="this.focus()"-->
+        <!--<span>-->
+        <!--<button class="col button button-raised button-round" onclick="createTableRow()">+</button>--><!--enterBarCode()-->
+        <!--</span>-->
+        <!--</p>-->
+        <!--</div>-->
+        <table id="tableWithFixedHead" style="position:fixed; top:104px; z-index: 100"><!--style="width:100%;position:fixed; top:104px; z-index: 100"--><!--style="width:calc(100% - 10px); margin-bottom: 60px;-->
+            <thead>
+            <tr id="tableFixedHeader">
+                <th id="num_td" style="width:50px;">№ п/п</th>
+                <!--<th width="80px;"></th>-->
+                <th id="code_td" style="width:40%;">Штрихкод</th>
+                <th id="um_td" style="width:50px;">Ед.Изм</th>
+                <th id="doc_qty" style="width:50px;">Учетное кол-во</th>
+                <th id="real_qty" style="width:50px;">Факт. кол-во</th>
+            </tr>
+            </thead>
+        </table>
+        <table id="inventoryTable" style=" margin-bottom: 32px;">
+        </table>
+        <table id="tableWithFixedFooter" style="position:fixed; bottom:32px; z-index: 100"><!--margin-bottom: 0px; padding-bottom: 60px;-->
+            <tfoot>
+            <tr  id="footTableFixedHeader" >
+                <td id="totalRowQty">0</td>
+                <td id="totalEmpty" ></td>
+                <td  id="totalDocQty" >0</td>
+                <td id="totalRealQty">0</td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+</template>
+<script>
+    return {
+        // Lifecycle Hooks
+//        beforeCreate() {
+//            console.log('componentBeforeCreate', this)
+//        },
+        created() {                                                                                         console.log('viewInv.html componentCreated', this);
+            let $$ = Dom7, thisInstance=this.$options, app7=this.$app;                                      //console.log('componentCreated Dom7', $$(this))
+            thisInstance.inventoryTableRowNum=0;
+            // $$(document).on('click','#enterRowButton' ,function(){                                          console.log('viewInv.html #enterRowButton click', this);
+            //     thisInstance.createTableRow($$("#barCodeInput").val(),app7);
+            // });
+            $$(document).on('keypress','#barCodeInput' ,function(e){                                        //console.log('#barCodeInput keypress', this);
+                if(e.keyCode==13||e.key=='Enter') thisInstance.createTableRow($$("#barCodeInput").val(),app7);
+            });
+        },
+        enterRowButtonOnClick: function () {                                                               console.log('viewInv.html enterRowButtonOnClick',this);
+            let $$ = Dom7, app7=this.app;
+            this.createTableRow($$("#barCodeInput").val(),app7);
+        },
+        createTableRow: function(barcode,app7){                                                             console.log('viewInv.html createTableRow barcode=',barcode, this);
+            if(!barcode){
+                app7.dialog.alert("Не удалось считать код", "Внимание");
+                return;
+            }
+            if(document.getElementById(barcode)){
+                document.getElementById(barcode).innerText=parseInt(document.getElementById(barcode).innerText)+1;
+                document.getElementById("barCodeInput").value='';
+                this.setTotalQty();
+                return;
+            }
+            let mainTable=document.getElementById('inventoryTable'),
+                tbody=document.createElement('tr'),trHigher=document.createElement('tr'),
+                tdRowNum=document.createElement('td'),tdProdName=document.createElement('td');
+            this.inventoryTableRowNum++;
+            tdRowNum.innerText=this.inventoryTableRowNum.toString(); tdRowNum.className='text-centered';
+            tdProdName.innerText="Товар со штрих-кодом "+barcode; tdProdName.className="blue-text";
+            trHigher.appendChild(tdRowNum); trHigher.appendChild(tdProdName);
+            let trLower=document.createElement('tr'), tdBarCode=document.createElement('td'), tdUm=document.createElement('td'),
+                tdRef=document.createElement('td'), tdReal=document.createElement('td'), thisInstance=this;
+            tdReal.id=barcode;
+            tbody.onclick=  function(){
+                thisInstance.showRealQtyFunction(tdReal, tdReal.innerText.trim(),tdProdName.innerText, app7);
+                if(document.getElementById('clickedTableRow')) document.getElementById('clickedTableRow').id="";
+                tbody.id="clickedTableRow";
+            };
+            tdRowNum.style.width=(document.getElementById('num_td').offsetWidth-11) + "px";
+            tdBarCode.style.width=(document.getElementById('code_td').offsetWidth-11) + "px";
+            tdUm.style.width=(document.getElementById('um_td').offsetWidth-11) + "px";
+            tdRef.style.width=(document.getElementById('doc_qty').offsetWidth-11) + "px";
+            tdRef.style.textAlign="center";
+            tdReal.style.width=(document.getElementById('real_qty').offsetWidth-11) + "px";
+            tdReal.style.textAlign="center";
+            tdBarCode.innerText=barcode; tdUm.innerText='шт'; tdRef.innerText='1'; tdReal.innerText='1';
+            tdUm.className='text-centered'; //tdRef.className='text-right'; //tdReal.className='text-right';
+            tdRef.className='refQty'; tdReal.className='realQty';
+            trLower.appendChild(tdBarCode); trLower.appendChild(tdUm); trLower.appendChild(tdRef); trLower.appendChild(tdReal);
+            tbody.appendChild(trHigher); tbody.appendChild(trLower);
+            mainTable.appendChild(tbody);
+            tdRowNum.rowSpan='2'; tdProdName.colSpan='4';
+            document.getElementById("totalRowQty").innerHTML=this.inventoryTableRowNum;
+            this.setTotalQty();
+            document.getElementById("barCodeInput").value='';
+        },
+        setTotalQty: function(){
+            let refQtylist = document.getElementsByClassName("refQty"), realQtylist = document.getElementsByClassName("realQty");
+            let totalrefQty=0,totalrealQty=0;
+            for(var tdIndex=0; tdIndex<refQtylist.length; tdIndex++){
+                totalrealQty+=parseInt(realQtylist[tdIndex].innerHTML);
+                totalrefQty+=parseInt(refQtylist[tdIndex].innerHTML);
+            }
+            document.getElementById("totalDocQty").innerHTML=totalrefQty;
+            document.getElementById("totalRealQty").innerHTML=totalrealQty;
+        },
+        showRealQtyFunction: function(cell, displayedQty, prodName, app7){
+            // var input='<br><input id="inputRealQty" type="number" style="text-align:center; border: 1px solid grey; padding: 5px" value="'+displayedQty+'"></<input>';
+            let thisInstance=this,
+                realQtyDialog=app7.dialog.create({
+                    destroyOnClose:true,
+                    content:'<br><input id="inputRealQty" type="number" style="text-align:center;border:1px solid grey;padding:5px" value="'+displayedQty+'"></<input>',
+                    title: 'Фактический остаток',
+                    text:prodName,
+                    on:{
+                        open:function(){
+                            document.getElementById("inputRealQty").focus();
+                        },
+                    },
+                    buttons:[
+                        {
+                            text:"ОТМЕНА",onClick:function(){
+                                realQtyDialog.close();
+                            }
+                        },
+                        {
+                            text:"ВВОД",keyCodes:[13],onClick:function(){
+                                cell.innerText=document.getElementById("inputRealQty").value.trim() || 0;
+                                thisInstance.setTotalQty();
+                                realQtyDialog.close();
+                            }
+                        }
+                    ]
+                }).open();
+        },
+//        beforeMount() {
+//            console.log('componentBeforeMount', this)
+//        },
+//        mounted() {
+//            console.log('componentMounted', this);
+//        },
+//        beforeDestroy() {
+//            console.log('componentBeforeDestroy', this);
+//        },
+//        destroyed() {
+//            console.log('componentDestroyed', this);
+//        },
+       data: function data() {// Component Data
+                                                                                                console.log('viewInv.html data',this);
+           let invData={},listInvsData=this.$app.listInvsData.listInvs;
+           if(!this.$route.params) return invData;
+           let invChID=this.$route.params.invChID;
+           if(invChID===null||invChID===undefined) return invData;
+           if(listInvsData){
+               for(let ind in listInvsData){
+                   let itemInvData=listInvsData[ind];
+                   if(itemInvData&&itemInvData.chID==invChID){
+                       invData=itemInvData;
+                       break;
+                   }
+               }
+           }
+           // Must return an object
+           return {item:invData,items:[]};
+       },
+//         methods: {// Component Methods
+//             openAlert: function () {
+//                 var self = this;
+//                 self.$app.dialog.alert('Hello World');
+//             }
+//         },
+        on: {// Page Events
+            // pageMounted: function(e, page) {
+            //     console.log('pageMounted', page);
+            // },
+            pageInit: function(e, page) {                                                                   console.log('viewInv.html pageInit', page);
+            },
+//                     //pageInit: function (event, page) {// do something when page initialized
+//                     //  document.getElementById("tableFixedHeader").style.width=document.getElementById("tableWithFixedHead").offsetWidth+'px';          //console.log('width=', document.getElementById("tableWithFixedHead").offsetWidth+'px');
+//                     //  document.getElementById("tableFixedHeader").style.position='fixed';
+//                     //},
+            // pageBeforeIn: function(e, page) {
+            //     console.log('pageBeforeIn', page);
+            // },
+            pageBeforeIn: function(e, page) {                                                                console.log('viewInv.html pageAfterIn', page);
+                $$("#app").prop("data-workingDoc", "inventory");
+                //$$("#app").addClass("inventory");
+                //$$(document).workingDoc="";
+                //$$('#barCodeInput').on('blur', '#barCodeInput', function(e){
+                //  $$(e.target).focus();
+                //});
+                //focusBarcodeInput();
+                //$$(document).on('keypress', '#barCodeInput',function(event){
+                //  onkeypressFunction(event.keyCode);
+                //});
+                let maxWidth=document.getElementById("tableWithFixedHead").clientWidth+'px';
+                document.getElementById("tableWithFixedHead").style.maxWidth=maxWidth;
+                document.getElementById("tableFixedHeader").style.maxWidth=maxWidth;
+                document.getElementById("inventoryTable").style.maxWidth=maxWidth;
+                document.getElementById("tableWithFixedFooter").style.maxWidth=maxWidth;
+                document.getElementById("footTableFixedHeader").style.maxWidth=maxWidth;
+                document.getElementById("inventoryTable").style.marginTop=( document.getElementById("tableFixedHeader").offsetHeight)  +'px';
+                document.getElementById("tableFixedHeader").style.position='fixed';
+                document.getElementById("footTableFixedHeader").style.position='fixed';
+                document.getElementById("footTableFixedHeader").style.maxWidth=maxWidth;
+                document.getElementById("totalRowQty").style.width=(document.getElementById('num_td').offsetWidth-10) + "px";
+                document.getElementById("totalEmpty").style.width=
+                    (document.getElementById('code_td').offsetWidth + document.getElementById('um_td').offsetWidth-10) + "px";
+                document.getElementById("totalDocQty").style.width= (document.getElementById('doc_qty').offsetWidth-11) + "px";
+                document.getElementById("totalRealQty").style.width= (document.getElementById('real_qty').offsetWidth-11) + "px";
+            },
+            // pageBeforeOut: function(e, page) {
+            //     console.log('pageBeforeOut', page);
+            // },
+            // pageAfterOut: function(e, page) {
+            //     console.log('pageAfterOut', page);
+            // },
+            // pageBeforeRemove: function(e, page) {
+            //     console.log('pageBeforeRemove', page);
+            // }
+        }
+    }
+</script>
