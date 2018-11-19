@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--
+        Customize this policy to fit your own app's needs. For more guidance, see:
+            https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
+        Some notes:
+            * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+                * Enable inline JS: add 'unsafe-inline' to default-src
+    -->
+    <!--<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: 'unsafe-inline' gap: https://ssl.gstatic.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">-->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: gap: content:">
+    <meta charset=utf-8>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover">
+    <!--<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">-->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2196f3">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <!--<link rel="stylesheet" type="text/css" href="css/index.css">-->
+    <link rel="stylesheet" href="framework7/css/framework7.min.css">
+    <link rel="stylesheet" href="css/icons.css">
+    <link rel="stylesheet" href="css/app.css">
+    <title>MobInv</title>
+</head>
+<body>
+<div id="app">
+    <div class="panel panel-left panel-cover" style="">
+        <div class="page">
+            <div class="page-content">
+                <div class="block-title">Настройки</div>
+                <!--<div class="block">-->
+                    <!--<p>This is a left side panel. You can close it by clicking outsite or on this link: <a href="#" class="panel-close">close me</a>. You can put here anything, even another isolated view like in <a href="#" data-panel="right" class="panel-open">Right Panel</a></p>-->
+                <!--</div>-->
+                <!--<div class="block-title">Main View Navigation</div>-->
+                <div class="list links-list">
+                    <ul>
+                        <li>
+                            <a href="/settingsServerURI/" class="panel-close">Сервер</a>
+                        </li>
+                        <!--<li>-->
+                            <!--<a href="/action-sheet/" class="panel-close">Action Sheet</a>-->
+                        <!--</li>-->
+                        <!--<li>-->
+                            <!--<a href="/badge/" class="panel-close">Badge</a>-->
+                        <!--</li>-->
+                        <!--<li>-->
+                            <!--<a href="/buttons/" class="panel-close">Buttons</a>-->
+                        <!--</li>-->
+                        <!--<li>-->
+                            <!--<a href="/cards/" class="panel-close">Cards</a>-->
+                        <!--</li>-->
+                        <!--<li>-->
+                            <!--<a href="/checkbox/" class="panel-close">Checkbox</a>-->
+                        <!--</li>-->
+                        <!--<li>-->
+                            <!--<a href="/chips/" class="panel-close">Chips/Tags</a>-->
+                        <!--</li>-->
+                        <!--<li>-->
+                            <!--<a href="/contacts-list/" class="panel-close">Contacts List</a>-->
+                        <!--</li>-->
+                        <!--<li>-->
+                            <!--<a href="/data-table/" class="panel-close">Data Table</a>-->
+                        <!--</li>-->
+                    </ul>
+                </div>
+                <!--<div class="block">-->
+                    <!--<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse faucibus mauris leo, eu bibendum neque congue non. Ut leo mauris, eleifend eu commodo a, egestas ac urna. Maecenas in lacus faucibus, viverra ipsum pulvinar, molestie arcu. Etiam lacinia venenatis dignissim. Suspendisse non nisl semper tellus malesuada suscipit eu et eros. Nulla eu enim quis quam elementum vulputate. Mauris ornare consequat nunc viverra pellentesque. Aenean semper eu massa sit amet aliquam. Integer et neque sed libero mollis elementum at vitae ligula. Vestibulum pharetra sed libero sed porttitor. Suspendisse a faucibus lectus.</p>-->
+                    <!--<p>Duis ut mauris sollicitudin, venenatis nisi sed, luctus ligula. Phasellus blandit nisl ut lorem semper pharetra. Nullam tortor nibh, suscipit in consequat vel, feugiat sed quam. Nam risus libero, auctor vel tristique ac, malesuada ut ante. Sed molestie, est in eleifend sagittis, leo tortor ullamcorper erat, at vulputate eros sapien nec libero. Mauris dapibus laoreet nibh quis bibendum. Fusce dolor sem, suscipit in iaculis id, pharetra at urna. Pellentesque tempor congue massa quis faucibus. Vestibulum nunc eros, convallis blandit dui sit amet, gravida adipiscing libero.</p>-->
+                <!--</div>-->
+            </div>
+        </div>
+    </div>
+    <div class="view view-main"><!-- Your main view, should have "view-main" class -->
+        <div class="page" data-page="login"><!-- Page, data-name contains page name which can be used in callbacks -->
+            <div class="navbar"><!-- Top Navbar -->
+                <div class="navbar-inner">
+                    <div class="left">
+                        <a href="#" class="link icon-only panel-open" data-panel="left">
+                            <i class="icon f7-icons">menu</i>
+                        </a>
+                    </div>
+                    <div class="title sliding">Мобильная инвентаризация</div>
+                </div>
+            </div>
+            <div class="page-content login-screen-content" id="mobInv-login-screen">
+                <div class="login-screen-title">Авторизация</div>
+                <div class="list no-hairlines-md">
+                    <ul>
+                        <li class="item-content item-input">
+                            <div class="item-inner">
+                                <div class="item-title item-label">Имя пользователя</div>
+                                <div class="item-input-wrap">
+                                    <input id="login-username" type="text" placeholder="Имя пользователя">
+                                    <span class="input-clear-button"></span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="item-content item-input">
+                            <div class="item-inner">
+                                <div class="item-title item-label">Пароль</div>
+                                <div class="item-input-wrap">
+                                    <input id="login-password" type="password" placeholder="Пароль">
+                                    <span class="input-clear-button"></span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="block">
+                    <div class="row">
+                        <div class="col" style="width:0px"></div>
+                        <button id="login-button" class="col button button-fill button-round" style="width:200px">ВОЙТИ</button>
+                        <div class="col" style="width:0px"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="cordova.js"></script><!-- Cordova -->
+<script>//src="js/index.js"
+    let app = {
+        initialize: function() {// Application Constructor
+            document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
+            document.addEventListener( 'pause', this.onPause.bind( this ), false );
+            document.addEventListener('resume', this.onResume.bind(this), false);
+        },
+        // deviceready Event Handler
+        //
+        // Bind any cordova events here. Common events are:
+        // 'pause', 'resume', etc.
+        onDeviceReady: function() {
+            this.receivedEvent('deviceready');
+        },
+        receivedEvent: function(id) {// Update DOM on a Received Event
+            activateScanReader();
+        },
+        onPause:function(){
+            disActivateScanReader();
+        },
+        onResume:function(){
+            activateScanReader();
+        }
+    }.initialize();
+    function activateScanReader(){
+        cordova.plugins.CipherlabRS30CordovaPlugin.initialise(/* there is no callback here */);
+        cordova.plugins.CipherlabRS30CordovaPlugin.setReceiveScanCallback(function (data) {
+            if(document.getElementById("app")['data-workingDoc'] =='inventory'){
+                // createTableRow(data);
+            }
+        });
+    }
+    function disActivateScanReader(){
+        cordova.plugins.CipherlabRS30CordovaPlugin.destroy(function () {
+            alert("destroyed");});
+    }
+</script>
+<script src="framework7/js/framework7.min.js"></script><!-- Framework7 library -->
+<script>//src="js/app.js"
+    let $$ = Dom7,// Dom7
+        app7  = new Framework7({// Framework7 App main instance
+            root: '#app', // app7 root element
+            theme: 'auto', // Automatic theme detection
+            routes: [//-- App routes --
+                { path: '/', url: './index.html' },
+                { path: '/settingsServerURI/', componentUrl: './settingsServerURI.html'},//,options:{reloadAll:true},
+                { path: '/viewListInvs/', componentUrl: './viewListInvs.html'},
+                { path: '/viewInv/:invChID', componentUrl: './viewInv.html'},//,options:{reloadAll:true},
+                //
+                { path: '(.*)', url: './pages/404.html' }// Default route (404 page). MUST BE THE LAST
+            ],
+            workingDoc:null
+        }),
+        mainView = app7.views.create('.view-main', {url: '/',domCache:true});//Init/Create main view
+
+    if (typeof(Storage)!=="undefined") {
+        let username=localStorage.getItem("login-username");
+        if(username&&username.toString().trim()!="")$$('#mobInv-login-screen #login-username').val(username);
+    } else {// Sorry! No Web Storage support..
+    }
+    let users=[
+        {"id":"0", "name":"a", pswd:""},
+        {"id":"1", "name":"anna", pswd:"123"},
+        {"id":"2", "name":"borya", pswd:"123"},
+        {"id":"3", "name":"vasya", pswd:"123"},
+        {"id":"4", "name":"gena", pswd:"123"},
+        {"id":"5", "name":"diana", pswd:"123"},
+        {"id":"6", "name":"anna1", pswd:"123"},
+        {"id":"7", "name":"borya1", pswd:"123"},
+        {"id":"8", "name":"vasya1", pswd:"123"},
+        {"id":"9", "name":"gena1", pswd:"123"},
+        {"id":"10", "name":"diana1", pswd:"123"},
+        {"id":"11", "name":"anna2", pswd:"123"},
+        {"id":"12", "name":"borya2", pswd:"123"},
+        {"id":"13", "name":"vasya2", pswd:"123"},
+        {"id":"14", "name":"gena2", pswd:"123"}
+    ];
+    app7.loginProcess=function(){
+        let username = $$('#mobInv-login-screen #login-username').val(),
+            password = $$('#mobInv-login-screen #login-password').val();
+        let ligInSuccess=false;
+        for(let k in users){
+            if(users[k].name==username){
+                if(users[k].pswd==password)ligInSuccess=true;
+                break;
+            }
+        }
+        if(!ligInSuccess){
+            app7.dialog.alert("Неверное имя или пароль","", function(){
+                $$('#mobInv-login-screen #login-username').val("");
+                $$('#mobInv-login-screen #login-password').val("");
+            });
+        }else{
+            mainView.router.navigate('/viewListInvs/');///viewInv/
+            if (typeof(Storage)!=="undefined") {
+                localStorage.setItem("login-username",username);
+            } else {// Sorry! No Web Storage support..
+            }
+        }
+    };
+    $$('#mobInv-login-screen #login-button').on('click', function () {                                      //console.log("#mobInv-login-screen #login-button",this);
+        app7.loginProcess();
+    });
+    $$('#mobInv-login-screen #login-password').on('keypress', function (e) {                                //console.log("#mobInv-login-screen #login-password keypress ",e);
+        if(e.keyCode==13||e.key=='Enter')app7.loginProcess();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!--suppress ALL, JSAnnotator -->
+<template>
+<div class="page" id="listInvs-view">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="left">
+                <a href="#" class="link icon-only panel-open" data-panel="left">
+                    <i class="icon f7-icons">menu</i>
+                </a>
+            </div>
+            <div class="title sliding">Инвентаризации</div>
+            <div class="subnavbar">
+                <div class="list" style="width:100%">
+                    <ul>
+                        <li>
+                            <a href="#" class="item-link smart-select">
+                                <select name="listInvs-stock">
+                                    {{#each listStocks}}
+                                        <option value={{stockID}}>{{stockName}}</option>
+                                    {{/each}}
+                                    <!--<option value="2">Склад сумки та одяг (Калинівка)</option>-->
+                                    <!--<option value="3">Могилів-Подільський 1 ТЦ"Гусі-Лебеді"</option>-->
+                                    <!--...-->
+                                </select>
+                                <div class="item-content">
+                                    <div class="item-inner">
+                                        <div class="item-title">Склад</div>
+                                        <div class="item-after"></div>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="page-content">
+        <div class="list media-list" style="margin:0">
+            <ul>
+                {{#each listInvs}}
+                <li>
+                    <a class="item-link item-content" href="/viewInv/{{chID}}">
+                        <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
+                            <div class="item-title-row">
+                                <div class="item-title" style="width:100%">
+                                    <div class="item-title">
+                                        <div class="item-header" style="display:inline-block;float:left">{{docID}} от {{docDate}}</div>
+                                        <div class="item-header" style="display:inline-block;float:right">{{stateName}}</div>
+                                    </div>
+                                    <div class="item-title">{{stockName}}</div>
+                                </div>
+                                <div class="item-after" style="min-width:80px">
+                                    <div style="width:100%;text-align:right">{{summ}}</div>
+                                </div>
+                            </div>
+                            <!--<div class="item-subtitle">{{stock}}</div>-->
+                        </div>
+                    </a>
+                </li>
+                {{/each}}
+                <!--<li>-->
+                    <!--<a href="#" class="item-link item-content">-->
+                        <!--<div class="item-inner">-->
+                            <!--<div class="item-title">-->
+                                <!--<div class="item-header">Email</div>-->
+                                <!--john@framework7-->
+                                <!--<div class="item-footer">Work</div>-->
+                            <!--</div>-->
+                            <!--<div class="item-after">Edit</div>-->
+                        <!--</div>-->
+                    <!--</a>-->
+                <!--</li>-->
+            </ul>
+        </div>
+    </div>
+</div>
+</template>
+<script>
+    return {
+        // Lifecycle Hooks
+//        beforeCreate() {
+//            console.log('componentBeforeCreate', this)
+//        },
+//         created() {                                                                                         console.log('componentCreated', this);
+//             // let $$ = Dom7, thisInstance=this.$options, app7=this.$app;                                      //console.log('componentCreated Dom7', $$(this))
+//         },
+//        beforeMount() {
+//            console.log('componentBeforeMount', this)
+//        },
+//        mounted() {
+//            console.log('componentMounted', this);
+//        },
+//        beforeDestroy() {
+//            console.log('componentBeforeDestroy', this);
+//        },
+//        destroyed() {
+//            console.log('componentDestroyed', this);
+//        },
+//        data: function data() {                                                                          console.log('viewListInvs.html data', this);
+//            let viewListInvsData=this.$app.data.viewListInvs;
+//            if(!viewListInvsData) return;
+//            return {
+//                listStocks:viewListInvsData.listStocks,
+//                listInvs:viewListInvsData.listInvs
+//            };
+//        },
+//         methods: {// Component Methods
+//             openAlert: function () {
+//                 var self = this;
+//                 self.$app.dialog.alert('Hello World');
+//             }
+//         },
+        on: {// Page Events
+            // pageMounted: function(e, page) {
+            //     console.log('viewListInvs.html pageMounted', page);
+            // },
+            // pageInit: function(e, page) {                                                                   console.log('viewListInvs.html pageInit', page);
+            //     var self = this;
+            //     var app = self.$app;
+            //     // request user data on page init
+            //     self.$setState({
+            //         user: '123',
+            //     });
+            // },
+                // app.request.get('http://api.website.com/get-user-profile', (user) => {
+                //     // update component state with new state
+                // });            },
+            // pageBeforeIn: function(e, page) {
+            //     console.log('pageBeforeIn', page);
+            // },
+            pageAfterIn: function(e, page) {                                                                console.log('viewListInvs.html pageAfterIn', page, this);
+                let app=page.app, cInstance=this;                                                                      //console.log('viewListInvs.html pageAfterIn app.listInvsData=',app.listInvsData);
+                if(app.data.viewListInvs) return
+                app.preloader.show();
+                setTimeout(function () {
+                    let listStocks=[
+                        {stockID:1,stockName:'Калинівка Каштан 0'},
+                        {stockID:2,stockName:'Калинівка Каштан 1'},
+                        {stockID:3,stockName:'Калинівка Каштан 3'},
+                        {stockID:4,stockName:'Склад сумки та одяг (Калинівка)'},
+                        {stockID:5,stockName:'Могилів-Подільський 1 ТЦ"Гусі-Лебеді'},
+                        {stockID:6,stockName:'Могилів-Подільський 2'}
+                    ]
+                    let listInvs=[
+                        {chID:1001,docID:123,docDate:'2018-11-01',stockName:'Калинівка Каштан 0',summ:123.45,stateName:'В работе'},
+                        {chID:1002,docID:124,docDate:'2018-11-02',stockName:'Калинівка Каштан 0',summ:1234.56,stateName:'В работе'},
+                        {chID:1003,docID:1245,docDate:'2018-11-03',stockName:'Склад сумки та одяг (Калинівка)',summ:12345.67,stateName:'В работе'},
+                        {chID:1004,docID:1246,docDate:'2018-11-03',stockName:'Могилів-Подільський 1 ТЦ"Гусі-Лебеді',summ:12345.67,stateName:'В работе'},
+                        {chID:1005,docID:1250,docDate:'2018-11-04',stockName:'Склад сумки та одяг (Калинівка)',summ:987654.32,stateName:'Документ закрыт'},
+                        {chID:1006,docID:1255,docDate:'2018-11-04',stockName:'Калинівка Каштан 0',summ:6543.21,stateName:'В работе'},
+                        {chID:1007,docID:1256,docDate:'2018-11-05',stockName:'Склад сумки та одяг (Калинівка)',summ:0.00,stateName:'В работе'},
+                        {chID:1008,docID:1259,docDate:'2018-11-05',stockName:'Могилів-Подільський 1 ТЦ"Гусі-Лебеді',summ:900987.99,stateName:'Документ закрыт'},
+                        {chID:1009,docID:1267,docDate:'2018-11-06',stockName:'Калинівка Каштан 0',summ:159753.46,stateName:'Документ закрыт'},
+                        {chID:1010,docID:1269,docDate:'2018-11-07',stockName:'Склад сумки та одяг (Калинівка)',summ:0.00,stateName:'В работе'},
+                        {chID:1011,docID:1271,docDate:'2018-11-08',stockName:'Могилів-Подільський 1 ТЦ"Гусі-Лебеді',summ:987.65,stateName:'Документ закрыт'}
+                    ];
+                    app.preloader.hide();// Hide Preloader
+                    app.data.viewListInvs={listStocks:listStocks,listInvs:listInvs};                    console.log('viewListInvs.html pageAfterIn app.listInvsData 2=',app.listInvsData);
+                    // page.router.navigate(page.router.currentRoute.url, {
+                    //     reloadCurrent: true,
+                    //     ignoreCache: true
+                    // });
+                    cInstance.$setState({
+                        listStocks:listStocks,
+                        listInvs:listInvs
+                    });
+                }, 1000);
+            },
+            // pageBeforeOut: function(e, page) {
+            //     console.log('pageBeforeOut', page);
+            // },
+            // pageAfterOut: function(e, page) {
+            //     console.log('pageAfterOut', page);
+            // },
+            // pageBeforeRemove: function(e, page) {
+            //     console.log('pageBeforeRemove', page);
+            // }
+        }
+    }
+</script>
