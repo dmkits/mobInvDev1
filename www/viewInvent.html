@@ -72,8 +72,24 @@
             /**
              * callback = function(inventData,err)
              */
-            loadInventData: function(chID,callback) {                                                      //console.log('viewInvent.html loadInventData chID=',chID, this);
-                callback([{}]);
+            loadInventData: function(callback) {                                                      //console.log('viewInvent.html loadInventData chID=',chID, this);
+                var app=this.$app, self=this, chID=this.item.chID;
+                app.preloader.show();
+                setTimeout(function () {
+                    var inventData=[
+                        {}
+                    ];
+                    self.fillInventTable(inventData);
+                    app.preloader.hide();// Hide Preloader
+                    // callback([{}]);
+                },1000);
+            },
+            fillInventTable: function(inventData){
+                for(var ind in inventData){
+                    var inventDataItem=inventData[ind];
+                    if(!inventDataItem)continue;
+                    inventDataItem.tableTDReal=this.createTableRow(inventDataItem);
+                }
             },
             /**
              * callback = function(prodData,err)
@@ -93,9 +109,9 @@
                 }
                 callback({Barcode:barcode,ProdName:'Товар со штрихкодом '+barcode,UM:'шт.'});
             },
-            createTableRow: function(prodData){                                                             //console.log('viewInvent.html createTableRow prodData=',prodData, this);
+            createTableRow: function(inventProdData){                                                             //console.log('viewInvent.html createTableRow prodData=',prodData, this);
                 var app7=this.$app;
-                if(!prodData){
+                if(!inventProdData){
                     if(!this.dialogAlertNoProd)
                         this.dialogAlertNoProd=
                             app7.dialog.alert("Не удалось получить данные товара", "Внимание",function(){
@@ -105,7 +121,7 @@
                         this.dialogAlertNoProd.open();
                     return;
                 }
-                var existstdReal=document.getElementById(prodData["Barcode"]);
+                var existstdReal=document.getElementById(inventProdData["Barcode"]);
                 if(existstdReal){
                     existstdReal.innerText=parseInt(existstdReal.innerText)+1;
                     document.getElementById("barCodeInput").value='';
@@ -145,14 +161,15 @@
                 };
                 tdReal.onclick=tdRef.onclick;tdReal.doSelect=tdRowNum.onclick;
                 tdRowNum.innerText=this.inventoryTableRowNum.toString();
-                tdProdName.innerText=prodData["ProdName"];
-                tdBarCode.innerText=prodData["Barcode"]; tdUm.innerText=prodData["UM"]; tdRef.innerText='1'; tdReal.innerText='1';
+                tdProdName.innerText=inventProdData["ProdName"];
+                tdBarCode.innerText=inventProdData["Barcode"]; tdUm.innerText=inventProdData["UM"]; tdRef.innerText=inventProdData["Qty"]; tdReal.innerText=inventProdData["NewQty"];
                 tdReal.id=tdBarCode.innerText;tdReal.trHigherOffsetTop=trHigher.offsetTop;
                 $$('.clickedTableRow').removeClass('clickedTableRow');
                 trHigher.classList.add('clickedTableRow');trLower.classList.add('clickedTableRow');
                 $$('#pageContentInventory').scrollTop(tdReal.trHigherOffsetTop,100);
                 this.setTotalQty();
                 document.getElementById("barCodeInput").value='';
+                return tdReal;
             },
             setTotalQty: function(){
                 var posCount=this.inventoryTableRowNum;
@@ -201,8 +218,8 @@
         },
         on: {
             pageInit: function(e, page) {                                                                   console.log('viewInvent.html pageInit', page, this);
-                let cInstance=this, app7=this.$app;
-                cInstance.inventoryTableRowNum=0;
+                this.inventoryTableRowNum=0;
+                this.loadInventData();
             },
             pageBeforeIn: function(e, page) {                                                                console.log('viewInvent.html pageBeforeIn', page);
                 $$("#app").prop("data-workingDoc", "inventory");
