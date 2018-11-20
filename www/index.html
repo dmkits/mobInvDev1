@@ -159,16 +159,15 @@
     }
 </script>
 <script src="framework7/js/framework7.min.js"></script><!-- Framework7 library -->
-<script>//src="js/app.js"
-    let $$ = Dom7,// Dom7
-        app7  = new Framework7({// Framework7 App main instance
+<script>
+    let app7  = new Framework7({// Framework7 App main instance
             root: '#app', // app7 root element
             theme: 'auto', // Automatic theme detection
             routes: [//-- App routes --
                 { path: '/', url: './index.html' },
                 { path: '/settingsServerURI/', componentUrl: './settingsServerURI.html'},//,options:{reloadAll:true},
-                { path: '/viewListInvs/', componentUrl: './viewListInvs.html'},
-                { path: '/viewInv/:invChID', componentUrl: './viewInv.html'},//,options:{reloadAll:true},
+                { path: '/viewListInvents/', componentUrl: './viewListInvents.html'},
+                { path: '/viewInvent/:inventChID', componentUrl: './viewInvent.html'},//,options:{reloadAll:true},
                 //
                 { path: '(.*)', url: './pages/404.html' }// Default route (404 page). MUST BE THE LAST
             ],
@@ -214,7 +213,7 @@
                 $$('#mobInv-login-screen #login-password').val("");
             });
         }else{
-            mainView.router.navigate('/viewListInvs/');///viewInv/
+            mainView.router.navigate('/viewListInvents/');
             if (typeof(Storage)!=="undefined") {
                 localStorage.setItem("login-username",username);
             } else {// Sorry! No Web Storage support..

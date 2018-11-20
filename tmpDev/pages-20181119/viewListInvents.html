@@ -1,6 +1,6 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-<div class="page" id="listInvs-view">
+<div class="page" id="listInvents-view">
     <div class="navbar">
         <div class="navbar-inner">
             <div class="left">
@@ -14,7 +14,7 @@
                     <ul>
                         <li>
                             <a href="#" class="item-link smart-select">
-                                <select name="listInvs-stock">
+                                <select name="listInvents-stock">
                                     {{#each listStocks}}
                                         <option value={{stockID}}>{{stockName}}</option>
                                     {{/each}}
@@ -38,7 +38,7 @@
     <div class="page-content">
         <div class="list media-list" style="margin:0">
             <ul>
-                {{#each listInvs}}
+                {{#each listInvents}}
                 <li>
                     <a class="item-link item-content" href="/viewInv/{{chID}}">
                         <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
@@ -83,7 +83,7 @@
 //            console.log('componentBeforeCreate', this)
 //        },
 //         created() {                                                                                         console.log('componentCreated', this);
-//             // let $$ = Dom7, thisInstance=this.$options, app7=this.$app;                                      //console.log('componentCreated Dom7', $$(this))
+//             // let thisInstance=this.$options, app7=this.$app;                                               //console.log('componentCreated Dom7', $$(this))
 //         },
 //        beforeMount() {
 //            console.log('componentBeforeMount', this)
@@ -97,12 +97,12 @@
 //        destroyed() {
 //            console.log('componentDestroyed', this);
 //        },
-//        data: function data() {                                                                          console.log('viewListInvs.html data', this);
-//            let viewListInvsData=this.$app.data.viewListInvs;
-//            if(!viewListInvsData) return;
+//        data: function data() {                                                                          console.log('viewListInvents.html data', this);
+//            let viewListInventsData=this.$app.data.viewListInvents;
+//            if(!viewListInventsData) return;
 //            return {
-//                listStocks:viewListInvsData.listStocks,
-//                listInvs:viewListInvsData.listInvs
+//                listStocks:viewListInventsData.listStocks,
+//                listInvents:viewListInventsData.listInvents
 //            };
 //        },
 //         methods: {// Component Methods
@@ -113,9 +113,9 @@
 //         },
         on: {// Page Events
             // pageMounted: function(e, page) {
-            //     console.log('viewListInvs.html pageMounted', page);
+            //     console.log('viewListInvents.html pageMounted', page);
             // },
-            // pageInit: function(e, page) {                                                                   console.log('viewListInvs.html pageInit', page);
+            // pageInit: function(e, page) {                                                                   console.log('viewListInvents.html pageInit', page);
             //     var self = this;
             //     var app = self.$app;
             //     // request user data on page init
@@ -129,9 +129,9 @@
             // pageBeforeIn: function(e, page) {
             //     console.log('pageBeforeIn', page);
             // },
-            pageAfterIn: function(e, page) {                                                                console.log('viewListInvs.html pageAfterIn', page, this);
-                let app=page.app, cInstance=this;                                                                      //console.log('viewListInvs.html pageAfterIn app.listInvsData=',app.listInvsData);
-                if(app.data.viewListInvs) return
+            pageAfterIn: function(e, page) {                                                                console.log('viewListInvents.html pageAfterIn', page, this);
+                let app=page.app, cInstance=this;                                                           //console.log('viewListInvents.html pageAfterIn app.data.viewListInvents=',app.data.viewListInvents);
+                if(app.data.viewListInvents) return
                 app.preloader.show();
                 setTimeout(function () {
                     let listStocks=[
@@ -142,7 +142,7 @@
                         {stockID:5,stockName:'Могилів-Подільський 1 ТЦ"Гусі-Лебеді'},
                         {stockID:6,stockName:'Могилів-Подільський 2'}
                     ]
-                    let listInvs=[
+                    let listInvents=[
                         {chID:1001,docID:123,docDate:'2018-11-01',stockName:'Калинівка Каштан 0',summ:123.45,stateName:'В работе'},
                         {chID:1002,docID:124,docDate:'2018-11-02',stockName:'Калинівка Каштан 0',summ:1234.56,stateName:'В работе'},
                         {chID:1003,docID:1245,docDate:'2018-11-03',stockName:'Склад сумки та одяг (Калинівка)',summ:12345.67,stateName:'В работе'},
@@ -156,14 +156,14 @@
                         {chID:1011,docID:1271,docDate:'2018-11-08',stockName:'Могилів-Подільський 1 ТЦ"Гусі-Лебеді',summ:987.65,stateName:'Документ закрыт'}
                     ];
                     app.preloader.hide();// Hide Preloader
-                    app.data.viewListInvs={listStocks:listStocks,listInvs:listInvs};                    console.log('viewListInvs.html pageAfterIn app.listInvsData 2=',app.listInvsData);
+                    app.data.viewListInvents={listStocks:listStocks,listInvents:listInvents};            console.log('viewListInvents.html pageAfterIn app.data.viewListInvents 2=',app.data.viewListInvents);
                     // page.router.navigate(page.router.currentRoute.url, {
                     //     reloadCurrent: true,
                     //     ignoreCache: true
                     // });
                     cInstance.$setState({
                         listStocks:listStocks,
-                        listInvs:listInvs
+                        listInvents:listInvents
                     });
                 }, 1000);
             },

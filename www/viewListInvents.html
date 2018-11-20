@@ -1,6 +1,6 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-<div class="page page-with-subnavbar" id="viewlistInvs">
+<div class="page page-with-subnavbar" id="viewListInvents">
     <div class="navbar">
         <div class="navbar-inner">
             <div class="left">
@@ -14,8 +14,8 @@
                     <div class="list" style="width:100%">
                         <ul>
                             <li>
-                                <a href="#" class="item-link smart-select" @smartselect:closed="viewlistInvsStockClosed">
-                                    <select id="viewlistInvs-stock">
+                                <a href="#" class="item-link smart-select" @smartselect:closed="viewListInventsStockClosed">
+                                    <select id="viewListInvents-stock">
                                         {{#each listStocks}}
                                         <option value={{stockID}}>{{stockName}}</option>
                                         {{/each}}
@@ -37,9 +37,9 @@
     <div class="page-content">
         <div class="list media-list" style="margin:0">
             <ul>
-                {{#each listInvs}}
+                {{#each listInvents}}
                 <li>
-                    <a class="item-link item-content" href="/viewInv/{{chID}}">
+                    <a class="item-link item-content" href="/viewInvent/{{chID}}">
                         <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
                             <div class="item-title-row">
                                 <div class="item-title" style="width:100%">
@@ -65,9 +65,9 @@
 <script>
     return {
         methods:{
-            loadListInvsData:function(){
-                let $$=Dom7, cInstance=this, app=this.$app,
-                    stockID=$$('#viewlistInvs-stock').val();
+            loadListInventsData:function(){
+                let cInstance=this, app=this.$app,
+                    stockID=$$('#viewListInvents-stock').val();
                 app.preloader.show();
                 setTimeout(function () {
                         let listStocks=[
@@ -78,7 +78,7 @@
                             {stockID:255,stockName:'Могилів-Подільський 1 ТЦ"Гусі-Лебеді'},
                             {stockID:366,stockName:'Могилів-Подільський 2'}
                         ]
-                        let listInvs=[
+                        let listInvents=[
                             {chID:1001,docID:123,docDate:'2018-11-01',stockName:'Калинівка Каштан 0',summ:123.45,stateName:'В работе'},
                             {chID:1002,docID:124,docDate:'2018-11-02',stockName:'Калинівка Каштан 0',summ:1234.56,stateName:'В работе'},
                             {chID:1003,docID:1245,docDate:'2018-11-03',stockName:'Склад сумки та одяг (Калинівка)',summ:12345.67,stateName:'В работе'},
@@ -91,7 +91,7 @@
                             {chID:1010,docID:1269,docDate:'2018-11-07',stockName:'Склад сумки та одяг (Калинівка)',summ:0.00,stateName:'В работе'},
                             {chID:1011,docID:1271,docDate:'2018-11-08',stockName:'Могилів-Подільський 1 ТЦ"Гусі-Лебеді',summ:987.65,stateName:'Документ закрыт'}
                         ];
-                        let listInvsByStockID=listInvs;
+                        let listInventsByStockID=listInvents;
                         if(stockID&&stockID.toString().trim()!=''){
                             let stockName='';
                             for(var ind in listStocks){
@@ -101,32 +101,32 @@
                                     break;
                                 }
                             }
-                            listInvsByStockID=[];
-                            for(var ind in listInvs){
-                                var listInvsItem=listInvs[ind];
-                                if(listInvsItem["stockName"]==stockName)listInvsByStockID.push(listInvsItem);
+                            listInventsByStockID=[];
+                            for(var ind in listInvents){
+                                var listInventsItem=listInvents[ind];
+                                if(listInventsItem["stockName"]==stockName)listInventsByStockID.push(listInventsItem);
                             }
                         }
                         app.preloader.hide();// Hide Preloader
-                        app.data.viewListInvs={listStocks:listStocks,listInvs:listInvsByStockID};         console.log('viewListInvs.html pageAfterIn app.data.viewListInvs 2=',app.data.viewListInvs);
+                        app.data.viewListInvents={listStocks:listStocks,listInvents:listInventsByStockID};   console.log('viewListInvents.html pageAfterIn app.data.viewListInvents 2=',app.data.viewListInvents);
                         cInstance.$setState({
                             listStocks:listStocks,
-                            listInvs:listInvsByStockID
+                            listInvents:listInventsByStockID
                         });
                 }, 1000);
                 // app.request.get('http://api.website.com/get-user-profile', (user) => {
                 //     // update component state with new state
                 // });            },
             },
-            viewlistInvsStockClosed:function(e){
-                this.loadListInvsData();
+            viewListInventsStockClosed:function(e){
+                this.loadListInventsData();
             }
         },
         on: {
-            pageAfterIn: function(e, page) {                                                             console.log('viewListInvs.html pageAfterIn', page, this);
-                let $$=Dom7, app=page.app, cInstance=this;                                               //console.log('viewListInvs.html pageAfterIn app.listInvsData=',app.listInvsData);
-                if(app.data.viewListInvs) return
-                cInstance.loadListInvsData();
+            pageAfterIn: function(e, page) {                                                             console.log('viewListInvents.html pageAfterIn', page, this);
+                let app=page.app, cInstance=this;
+                if(app.data.viewListInvents) return
+                cInstance.loadListInventsData();
             }
         }
     }
