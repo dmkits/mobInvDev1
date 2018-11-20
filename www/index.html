@@ -178,52 +178,66 @@
     if (typeof(Storage)!=="undefined") {
         let username=localStorage.getItem("login-username");
         if(username&&username.toString().trim()!="")$$('#mobInv-login-screen #login-username').val(username);
+        app7.data['serverURI']=localStorage.getItem("settings-serverURI");
     } else {// Sorry! No Web Storage support..
     }
-    let users=[
-        {"id":"0", "name":"a", pswd:""},
-        {"id":"1", "name":"anna", pswd:"123"},
-        {"id":"2", "name":"borya", pswd:"123"},
-        {"id":"3", "name":"vasya", pswd:"123"},
-        {"id":"4", "name":"gena", pswd:"123"},
-        {"id":"5", "name":"diana", pswd:"123"},
-        {"id":"6", "name":"anna1", pswd:"123"},
-        {"id":"7", "name":"borya1", pswd:"123"},
-        {"id":"8", "name":"vasya1", pswd:"123"},
-        {"id":"9", "name":"gena1", pswd:"123"},
-        {"id":"10", "name":"diana1", pswd:"123"},
-        {"id":"11", "name":"anna2", pswd:"123"},
-        {"id":"12", "name":"borya2", pswd:"123"},
-        {"id":"13", "name":"vasya2", pswd:"123"},
-        {"id":"14", "name":"gena2", pswd:"123"}
-    ];
     app7.loginProcess=function(){
         let username = $$('#mobInv-login-screen #login-username').val(),
             password = $$('#mobInv-login-screen #login-password').val();
-        let ligInSuccess=false;
-        for(let k in users){
-            if(users[k].name==username){
-                if(users[k].pswd==password)ligInSuccess=true;
-                break;
-            }
-        }
-        if(!ligInSuccess){
-            app7.dialog.alert("Неверное имя или пароль","", function(){
-                $$('#mobInv-login-screen #login-username').val("");
-                $$('#mobInv-login-screen #login-password').val("");
+        // app7.request.postJSON(app7.data['serverURI']+'/login', {}, (data) => {                           console.log('login',data);
+        //     // update component state with new state
+        //     let logInSuccess=false;
+        //     if(!logInSuccess){
+        //         app7.dialog.alert("Неверное имя или пароль","", function(){
+        //             $$('#mobInv-login-screen #login-username').val("");
+        //             $$('#mobInv-login-screen #login-password').val("");
+        //         });
+        //     }else{
+        //         mainView.router.navigate('/viewListInvents/');
+        //         if (typeof(Storage)!=="undefined") {
+        //             localStorage.setItem("login-username",username);
+        //         } else {// Sorry! No Web Storage support..
+        //         }
+        //     }
+        // });
+        app7.request.postJSON(app7.data['serverURI']+'/login', {user:username,pswrd:password},
+            function(data){                                                                                 console.log('/login',data);
+                // update component state with new state
+                let logInSuccess=false, msg='';
+                if(data&&data.error){
+                    if(data.userErrorMsg)msg=data.userErrorMsg;
+                    else msg="Вход на сервер неудался!<br>"+data.error;
+                } else if(data&&data.result=='success'){
+                    logInSuccess=true;
+
+                } else
+                    msg="Вход на сервер неудался!";
+                if(logInSuccess){
+                    mainView.router.navigate('/viewListInvents/');
+                    if (typeof(Storage)!=="undefined") {
+                        localStorage.setItem("login-username",username);
+                    } else {// Sorry! No Web Storage support..
+                    }
+                    return
+                }
+                app7.dialog.alert(msg,"Внимание", function(){
+                    $$('#mobInv-login-screen #login-username').val("");
+                    $$('#mobInv-login-screen #login-password').val("");
+                });
+            },function(err,e){                                                                              console.log('/login error',err,e);
+                var state=err.status, msg='';
+                if(state===0){
+                    msg="Неправильный или недействительный адрес сервера"+
+                            "<br>или доступ по указанному адресу сервера запрещен.";
+                } else
+                    msg="Не удалось свзаться с сервером по указанному адресу.";
+                app7.dialog.alert(msg,"Внимание");
             });
-        }else{
-            mainView.router.navigate('/viewListInvents/');
-            if (typeof(Storage)!=="undefined") {
-                localStorage.setItem("login-username",username);
-            } else {// Sorry! No Web Storage support..
-            }
-        }
     };
-    $$('#mobInv-login-screen #login-button').on('click', function () {                                      //console.log("#mobInv-login-screen #login-button",this);
+    $$('#mobInv-login-screen #login-button').on('click', function () {
         app7.loginProcess();
     });
-    $$('#mobInv-login-screen #login-password').on('keypress', function (e) {                                //console.log("#mobInv-login-screen #login-password keypress ",e);
+    $$('#mobInv-login-screen #login-password').on('keypress', function (e) {
         if(e.keyCode==13||e.key=='Enter')app7.loginProcess();
     });
 </script>

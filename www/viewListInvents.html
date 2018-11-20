@@ -69,6 +69,49 @@
                 let cInstance=this, app=this.$app,
                     stockID=$$('#viewListInvents-stock').val();
                 app.preloader.show();
+                app7.request.json(app.data['serverURI']+'/mobile/ven/getDataForVensList',
+                    function(data){                                                                         console.log('/mobile/ven/getDataForVensList',data);
+                        // update component state with new state
+
+                        app.preloader.hide();// Hide Preloader
+                        app.data.viewListInvents={listStocks:[],listInvents:[]};                            console.log('viewListInvents.html pageAfterIn app.data.viewListInvents 2=',app.data.viewListInvents);
+                        cInstance.$setState({
+                            listStocks:listStocks,
+                            listInvents:listInventsByStockID
+                        });
+
+                        // let logInSuccess=false, msg='';
+                        // if(data&&data.error){
+                        //     if(data.userErrorMsg)msg=data.userErrorMsg;
+                        //     else msg="Вход на сервер неудался!<br>"+data.error;
+                        // } else if(data&&data.result=='success'){
+                        //     logInSuccess=true;
+                        //
+                        // } else
+                        //     msg="Вход на сервер неудался!";
+                        // if(logInSuccess){
+                        //     mainView.router.navigate('/viewListInvents/');
+                        //     if (typeof(Storage)!=="undefined") {
+                        //         localStorage.setItem("login-username",username);
+                        //     } else {// Sorry! No Web Storage support..
+                        //     }
+                        //     return
+                        // }
+                        // app7.dialog.alert(msg,"Внимание", function(){
+                        //     $$('#mobInv-login-screen #login-username').val("");
+                        //     $$('#mobInv-login-screen #login-password').val("");
+                        // });
+                    },function(err,e){                                                                      console.log('/mobile/ven/getDataForVensList error',err,e);
+                        // var state=err.status, msg='';
+                        // if(state===0){
+                        //     msg="Неправильный или недействительный адрес сервера"+
+                        //         "<br>или доступ по указанному адресу сервера запрещен.";
+                        // } else
+                        //     msg="Не удалось свзаться с сервером по указанному адресу.";
+                        // app7.dialog.alert(msg,"Внимание");
+
+                    });
+                return;
                 setTimeout(function () {
                         let listStocks=[
                             {stockID:11,stockName:'Калинівка Каштан 0'},

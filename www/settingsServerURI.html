@@ -26,7 +26,7 @@
             </ul>
             <div class="row">
                 <div class="col" style="width:0px"></div>
-                <button id="settings-serverURI-store-button" class="col button button-fill button-round" style="width:200px">СОХРАНИТЬ</button>
+                <button id="settings-serverURI-store-button" class="col button button-fill button-round" style="width:200px" @click="buttonStoreClick">СОХРАНИТЬ</button>
                 <div class="col" style="width:0px"></div>
             </div>
         </div>
@@ -35,23 +35,19 @@
 </template>
 <script>
     return {
-        created() {
-            let $$ = Dom7;
-            $$(document).on('click','#settings-serverURI-store-button',function(){
+        methods:{
+            buttonStoreClick:function(){
                 let srvURI=$$("#settings-serverURI-input").val();
                 if (typeof(Storage)!=="undefined"&&srvURI&&srvURI.toString().trim()!="") {
                     localStorage.setItem("settings-serverURI",srvURI);
                 } else {// Sorry! No Web Storage support..
                 }
-            });
+                this.$app.data['serverURI']=srvURI;
+            }
         },
-        on: {// Page Events
+        on: {
             pageAfterIn: function(e, page) {
-                let $$ = Dom7;
-                if (typeof(Storage)!=="undefined") {
-                    $$("#settings-serverURI-input").val(localStorage.getItem("settings-serverURI"));
-                } else {// Sorry! No Web Storage support..
-                }
+                $$("#settings-serverURI-input").val(this.$app.data['serverURI']);
             }
         }
     }
