@@ -52,7 +52,7 @@
 </template>
 <script>
     return {
-        data: function data() {                                                                         console.log('viewInv.html data',this);
+        data: function data() {                                                                             //console.log('viewInv.html data',this);
             let invData={},listInvsData=this.$app.data.viewListInvs.listInvs;
             if(!this.$route.params) return invData;
             let invChID=this.$route.params.invChID;
@@ -69,49 +69,64 @@
             return {item:invData,items:[]};
         },
         methods: {
-            createTableRow: function(barcode){                                                             console.log('viewInv.html createTableRow barcode=',barcode, this);
+            createTableRow: function(barcode){                                                             //console.log('viewInv.html createTableRow barcode=',barcode, this);
                 var app7=this.$app;
                 if(!barcode){
                     app7.dialog.alert("Не удалось считать код", "Внимание");
                     return;
                 }
-                if(document.getElementById(barcode)){
-                    document.getElementById(barcode).innerText=parseInt(document.getElementById(barcode).innerText)+1;
+                var existstdReal=document.getElementById(barcode);
+                if(existstdReal){
+                    existstdReal.innerText=parseInt(document.getElementById(barcode).innerText)+1;
                     document.getElementById("barCodeInput").value='';
+                    $$('.clickedTableRow').removeClass('clickedTableRow');
+                    existstdReal.doSelect();
+                    $$('#pageContentInventory').scrollTop(existstdReal.trHigherOffsetTop,10);
                     this.setTotalQty();
                     return;
                 }
                 let mainTable=document.getElementById('inventoryTable'),
                     trHigher=document.createElement('tr'),
-                    tdRowNum=document.createElement('td'),tdProdName=document.createElement('td');
-                this.inventoryTableRowNum++;
-                tdRowNum.innerText=this.inventoryTableRowNum.toString(); tdRowNum.className='text-centered';
-                tdProdName.innerText="Товар со штрих-кодом "+barcode; tdProdName.className="blue-text";
-                trHigher.appendChild(tdRowNum); trHigher.appendChild(tdProdName);
-                let trLower=document.createElement('tr'),
+                    tdRowNum=document.createElement('td'),tdProdName=document.createElement('td'),
+                    trLower=document.createElement('tr'),
                     tdBarCode=document.createElement('td'), tdUm=document.createElement('td'),
-                    tdRef=document.createElement('td'), tdReal=document.createElement('td'), thisInstance=this;
-                tdReal.id=barcode;
-                // tbody.onclick=  function(){
-                //     thisInstance.showRealQtyFunction(tdReal, tdReal.innerText.trim(),tdProdName.innerText);
-                //     if(document.getElementById('clickedTableRow')) document.getElementById('clickedTableRow').id="";
-                //     tbody.id="clickedTableRow";
-                // };
-                tdRowNum.style.width=(document.getElementById('num_td').offsetWidth-11) + "px";
-                tdUm.style.width=(document.getElementById('um_td').offsetWidth-11) + "px";
-                tdRef.style.width=(document.getElementById('doc_qty').offsetWidth-11) + "px"; tdRef.style.textAlign="center";
-                tdReal.style.width=(document.getElementById('real_qty').offsetWidth-11) + "px"; tdReal.style.textAlign="center";
-                tdBarCode.innerText=barcode; tdUm.innerText='шт'; tdRef.innerText='1'; tdReal.innerText='1';
-                tdUm.className='text-centered'; //tdRef.className='text-right'; //tdReal.className='text-right';
-                tdRef.className='refQty'; tdReal.className='realQty';
+                    tdRef=document.createElement('td'), tdReal=document.createElement('td'),
+                    thisInstance=this;
+                this.inventoryTableRowNum++;
+                tdRowNum.style.width=(document.getElementById('num_td').offsetWidth-11) + "px";tdRowNum.className='text-centered';
+                tdProdName.className="blue-text";
+                trHigher.appendChild(tdRowNum); trHigher.appendChild(tdProdName);
+                tdUm.style.width=(document.getElementById('um_td').offsetWidth-11) + "px";tdUm.className='text-centered';
+                tdRef.style.width=(document.getElementById('doc_qty').offsetWidth-11) + "px"; tdRef.style.textAlign="center";tdRef.className='refQty';
+                tdReal.style.width=(document.getElementById('real_qty').offsetWidth-11) + "px"; tdReal.style.textAlign="center";tdReal.className='realQty';
                 trLower.appendChild(tdBarCode); trLower.appendChild(tdUm); trLower.appendChild(tdRef); trLower.appendChild(tdReal);
                 mainTable.appendChild(trHigher); mainTable.appendChild(trLower);
                 tdRowNum.rowSpan='2'; tdProdName.colSpan='4';
-                document.getElementById("totalRowQty").innerHTML=this.inventoryTableRowNum;
+                tdRowNum.onclick=  function(){
+                    $$('.clickedTableRow').removeClass('clickedTableRow');
+                    trHigher.classList.add('clickedTableRow');trLower.classList.add('clickedTableRow');
+                };
+                tdProdName.onclick=tdRowNum.onclick;tdProdName.onclick=tdRowNum.onclick;
+                tdBarCode.onclick=tdRowNum.onclick;tdUm.onclick=tdRowNum.onclick;
+                tdRef.onclick=  function(){
+                    $$('.clickedTableRow').removeClass('clickedTableRow');
+                    trHigher.classList.add('clickedTableRow');trLower.classList.add('clickedTableRow');
+                    thisInstance.showRealQtyFunction(tdReal, tdReal.innerText.trim(),tdProdName.innerText);
+                };
+                tdReal.onclick=tdRef.onclick;tdReal.doSelect=tdRowNum.onclick;
+                tdRowNum.innerText=this.inventoryTableRowNum.toString();
+                tdProdName.innerText="Товар со штрих-кодом "+barcode;
+                tdBarCode.innerText=barcode; tdUm.innerText='шт'; tdRef.innerText='1'; tdReal.innerText='1';
+                tdReal.id=barcode;tdReal.trHigherOffsetTop=trHigher.offsetTop;
+                $$('.clickedTableRow').removeClass('clickedTableRow');
+                trHigher.classList.add('clickedTableRow');trLower.classList.add('clickedTableRow');
+                $$('#pageContentInventory').scrollTop(tdReal.trHigherOffsetTop,100);
                 this.setTotalQty();
                 document.getElementById("barCodeInput").value='';
             },
             setTotalQty: function(){
+                var posCount=this.inventoryTableRowNum;
+                document.getElementById("totalRowQty").innerHTML=posCount;
                 let refQtylist = document.getElementsByClassName("refQty"), realQtylist = document.getElementsByClassName("realQty");
                 let totalrefQty=0,totalrealQty=0;
                 for(var tdIndex=0; tdIndex<refQtylist.length; tdIndex++){
@@ -122,47 +137,36 @@
                 document.getElementById("totalRealQty").innerHTML=totalrealQty;
             },
             showRealQtyFunction: function(cell, displayedQty, prodName){
-                var app7=this.$app;
-                let thisInstance=this,
-                    realQtyDialog=app7.dialog.create({
-                        destroyOnClose:true,
+                let app7=this.$app, thisInstance=this,
+                    realQtyDialog=app7.dialog.create({ title: 'Фактический остаток', destroyOnClose:true,
                         content:'<br><input id="inputRealQty" type="number" style="text-align:center;border:1px solid grey;padding:5px" value="'+displayedQty+'"></<input>',
-                        title: 'Фактический остаток',
                         text:prodName,
                         on:{
                             open:function(){
                                 document.getElementById("inputRealQty").focus();
                             },
                         },
-                        buttons:[
-                            {
-                                text:"ОТМЕНА",onClick:function(){
-                                    realQtyDialog.close();
-                                }
-                            },
-                            {
-                                text:"ВВОД",keyCodes:[13],onClick:function(){
+                        buttons:[{ text:"ОТМЕНА",onClick:function(){ realQtyDialog.close(); } },
+                            { text:"ВВОД",keyCodes:[13],onClick:function(){
                                     cell.innerText=document.getElementById("inputRealQty").value.trim() || 0;
                                     thisInstance.setTotalQty();
                                     realQtyDialog.close();
-                                }
-                            }
-                        ]
+                            } } ]
                     }).open();
             },
             barcodeInputEnter: function () {
-                var $$ = Dom7, self=this;                                                               //console.log('viewInv.html enterBarCode', self);
+                var self=this;
                 self.createTableRow($$("#barCodeInput").val());
+                $$("#barCodeInput").focus();
             },
             barcodeInputKeypress: function (e) {
-                var $$ = Dom7, self=this;                                                               //console.log('viewInv.html enterBarCode', self);
-                // self.$app.dialog.alert('enterBarCode');
+                var self=this;
                 if(e.keyCode==13||e.key=='Enter') self.createTableRow($$("#barCodeInput").val());
             }
         },
         on: {
-            pageInit: function(e, page) {                                                                console.log('viewInv.html pageInit', page, this);
-                let $$ = Dom7, cInstance=this, app7=this.$app;                                  //console.log('viewInv.html pageInit 1=', $$("#enterRowButton"),$$("#barCodeInput"));
+            pageInit: function(e, page) {                                                                   console.log('viewInv.html pageInit', page, this);
+                let cInstance=this, app7=this.$app;
                 cInstance.inventoryTableRowNum=0;
             },
             pageBeforeIn: function(e, page) {                                                                console.log('viewInv.html pageBeforeIn', page);

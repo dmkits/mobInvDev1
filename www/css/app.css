@@ -24,7 +24,7 @@ tfoot td{
     padding: 5px 5px 5px 5px;
     text-align:center;
 }
-#clickedTableRow{
+.clickedTableRow{
     background-color:#cfd5da;
 }
 #login-button-div{
