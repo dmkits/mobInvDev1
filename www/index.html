@@ -181,45 +181,74 @@
         app7.data['serverURI']=localStorage.getItem("settings-serverURI");
     } else {// Sorry! No Web Storage support..
     }
+    app7.request.setup({ headers: { 'x-requested-with': 'application/json; charset=utf-8' } });
+    /**
+     * params = { url, conditions, timeout, showRequestErrorDialog }
+     * default: params.showRequestErrorDialog = true
+     * resultCallback = function(result, error)
+     *  result = undefined if request failed
+     *  result = null if result is empty or result error (parameter error exists)
+     *  result = response result
+     */
+    app7.srvRequestJSON=function(params,callback){
+        if(!params)return;
+        let conditions={};
+        if(params.conditions&&typeof(params.conditions)=="string") conditions=params.conditions.replace('=','~');
+        else if(params.conditions)
+            for(var cName in params.conditions) conditions[cName.replace('=','~')]=params.conditions[cName];
+        this.request.json(app7.data['serverURI']+params.url,conditions,
+            function(data){                                                                             console.log('app7.srvRequestJSON',app7.data['serverURI']+params.url,'success data=',data);
+                if(data==undefined||data==null||data.error!==undefined){
+                    if(params.showRequestErrorDialog==false){
+                        callback(null,(data)?data.error:null);
+                        return;
+                    }
+                    let msg='Не удалось получить данные с сервера!';
+                    if(data&&data.error){
+                        if(data.userErrorMsg)msg+='<br>'+data.userErrorMsg;else msg+="<br>"+data.error;
+                    }
+                    app7.dialog.alert(msg,"Внимание",function(){
+                        callback(null,(data)?data.error:null);
+                    });
+                    return;
+                }
+                callback(data);
+            },function(err,e){                                                                          console.log('app7.srvRequestJSON',app7.data['serverURI']+params.url,'error err=',err);
+                if(params.showRequestErrorDialog==false){
+                    callback(undefined,err);
+                    return;
+                }
+                let state=err.status, msg='';
+                if(state===0){
+                    msg="Неправильный или недействительный адрес сервера"+
+                        "<br>или доступ по указанному адресу сервера запрещен.";
+                } else
+                    msg="Не удалось установить связь с сервером по указанному адресу.";
+                app7.dialog.alert(msg,"Внимание",function(){
+                    callback(undefined,err);
+                });
+            });
+    };
     app7.loginProcess=function(){
         let username = $$('#mobInv-login-screen #login-username').val(),
             password = $$('#mobInv-login-screen #login-password').val();
-        // app7.request.postJSON(app7.data['serverURI']+'/login', {}, (data) => {                           console.log('login',data);
-        //     // update component state with new state
-        //     let logInSuccess=false;
-        //     if(!logInSuccess){
-        //         app7.dialog.alert("Неверное имя или пароль","", function(){
-        //             $$('#mobInv-login-screen #login-username').val("");
-        //             $$('#mobInv-login-screen #login-password').val("");
-        //         });
-        //     }else{
-        //         mainView.router.navigate('/viewListInvents/');
-        //         if (typeof(Storage)!=="undefined") {
-        //             localStorage.setItem("login-username",username);
-        //         } else {// Sorry! No Web Storage support..
-        //         }
-        //     }
-        // });
         app7.request.postJSON(app7.data['serverURI']+'/login', {user:username,pswrd:password},
             function(data){                                                                                 console.log('/login',data);
-                // update component state with new state
-                let logInSuccess=false, msg='';
-                if(data&&data.error){
-                    if(data.userErrorMsg)msg=data.userErrorMsg;
-                    else msg="Вход на сервер неудался!<br>"+data.error;
-                } else if(data&&data.result=='success'){
-                    logInSuccess=true;
-
-                } else
-                    msg="Вход на сервер неудался!";
-                if(logInSuccess){
+                let msg='';
+                if(data&&data.uuid&&data.uuid.toString().trim()!=''){
+                    app7.data.uuid=data.uuid;
+                    app7.request.setup({ headers: {'uuid':data.uuid} });
                     mainView.router.navigate('/viewListInvents/');
                     if (typeof(Storage)!=="undefined") {
                         localStorage.setItem("login-username",username);
                     } else {// Sorry! No Web Storage support..
                     }
                     return
-                }
+                } else if(data&&data.error){
+                    if(data.userErrorMsg)msg=data.userErrorMsg;
+                    else msg="Вход на сервер неудался!<br>"+data.error;
+                } else
+                    msg="Вход на сервер неудался!";
                 app7.dialog.alert(msg,"Внимание", function(){
                     $$('#mobInv-login-screen #login-username').val("");
                     $$('#mobInv-login-screen #login-password').val("");
@@ -230,7 +259,7 @@
                     msg="Неправильный или недействительный адрес сервера"+
                             "<br>или доступ по указанному адресу сервера запрещен.";
                 } else
-                    msg="Не удалось свзаться с сервером по указанному адресу.";
+                    msg="Не удалось установить связь с сервером по указанному адресу.";
                 app7.dialog.alert(msg,"Внимание");
             });
     };
