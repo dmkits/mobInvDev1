@@ -44,13 +44,13 @@
                             <div class="item-title-row">
                                 <div class="item-title" style="width:100%">
                                     <div class="item-title">
-                                        <div class="item-header" style="display:inline-block;float:left">{{DocID}} от {{js 'var self=this; return @root.ff1(123)'}}</div>
+                                        <div class="item-header" style="display:inline-block;float:left">{{DocID}} от {{SDocDate}}</div>
                                         <div class="item-header" style="display:inline-block;float:right">{{StateName}}</div>
                                     </div>
                                     <div class="item-title">{{StockName}}</div>
                                 </div>
                                 <div class="item-after" style="min-width:80px">
-                                    <div style="width:100%;text-align:right">{{TSumCC_wt}}</div>
+                                    <div style="width:100%;text-align:right">{{TVenQty}}</div>
                                 </div>
                             </div>
                         </div>
@@ -64,13 +64,7 @@
 </template>
 <script>
     return {
-        data:function(){
-            return {
-                f1:function(){ return 'ASD'; }
-            }
-        },
         methods:{
-            ff1:function(p1){ return p1; },
             loadListInventsData:function(){
                 let cInstance=this, app=this.$app,
                     stockID=$$('#viewListInvents-stock').val();
@@ -79,69 +73,20 @@
                     function(result,error){
                         app.preloader.hide();// Hide Preloader
                         if(!result)return;
-                        app.data.viewListInvents={listStocks:result.listStocks,listInvents:result.listInventsByStockID};    console.log('viewListInvents.html pageAfterIn app.data.viewListInvents 2=',app.data.viewListInvents);
+                        app.data.viewListInvents={listStocks:result.listStocks,listInvents:result.listInventsByStockID};    //console.log('viewListInvents.html pageAfterIn app.data.viewListInvents 2=',app.data.viewListInvents);
                         cInstance.$setState({
                             listStocks:result.listStocks,
                             listInvents:result.listInventsByStockID
                         });
                     })
-
                 return;
-                setTimeout(function () {
-                        let listStocks=[
-                            {stockID:11,stockName:'Калинівка Каштан 0'},
-                            {stockID:222,stockName:'Калинівка Каштан 1'},
-                            {stockID:3333,stockName:'Калинівка Каштан 3'},
-                            {stockID:144,stockName:'Склад сумки та одяг (Калинівка)'},
-                            {stockID:255,stockName:'Могилів-Подільський 1 ТЦ"Гусі-Лебеді'},
-                            {stockID:366,stockName:'Могилів-Подільський 2'}
-                        ]
-                        let listInvents=[
-                            {chID:1001,docID:123,docDate:'2018-11-01',stockName:'Калинівка Каштан 0',summ:123.45,stateName:'В работе'},
-                            {chID:1002,docID:124,docDate:'2018-11-02',stockName:'Калинівка Каштан 0',summ:1234.56,stateName:'В работе'},
-                            {chID:1003,docID:1245,docDate:'2018-11-03',stockName:'Склад сумки та одяг (Калинівка)',summ:12345.67,stateName:'В работе'},
-                            {chID:1004,docID:1246,docDate:'2018-11-03',stockName:'Могилів-Подільський 1 ТЦ"Гусі-Лебеді',summ:12345.67,stateName:'В работе'},
-                            {chID:1005,docID:1250,docDate:'2018-11-04',stockName:'Склад сумки та одяг (Калинівка)',summ:987654.32,stateName:'Документ закрыт'},
-                            {chID:1006,docID:1255,docDate:'2018-11-04',stockName:'Калинівка Каштан 0',summ:6543.21,stateName:'В работе'},
-                            {chID:1007,docID:1256,docDate:'2018-11-05',stockName:'Склад сумки та одяг (Калинівка)',summ:0.00,stateName:'В работе'},
-                            {chID:1008,docID:1259,docDate:'2018-11-05',stockName:'Могилів-Подільський 1 ТЦ"Гусі-Лебеді',summ:900987.99,stateName:'Документ закрыт'},
-                            {chID:1009,docID:1267,docDate:'2018-11-06',stockName:'Калинівка Каштан 0',summ:159753.46,stateName:'Документ закрыт'},
-                            {chID:1010,docID:1269,docDate:'2018-11-07',stockName:'Склад сумки та одяг (Калинівка)',summ:0.00,stateName:'В работе'},
-                            {chID:1011,docID:1271,docDate:'2018-11-08',stockName:'Могилів-Подільський 1 ТЦ"Гусі-Лебеді',summ:987.65,stateName:'Документ закрыт'}
-                        ];
-                        let listInventsByStockID=listInvents;
-                        if(stockID&&stockID.toString().trim()!=''){
-                            let stockName='';
-                            for(var ind in listStocks){
-                                var listStocksItem=listStocks[ind];
-                                if(listStocksItem["stockID"]==stockID){
-                                    stockName=listStocksItem["stockName"];
-                                    break;
-                                }
-                            }
-                            listInventsByStockID=[];
-                            for(var ind in listInvents){
-                                var listInventsItem=listInvents[ind];
-                                if(listInventsItem["stockName"]==stockName)listInventsByStockID.push(listInventsItem);
-                            }
-                        }
-                        app.preloader.hide();// Hide Preloader
-                        app.data.viewListInvents={listStocks:listStocks,listInvents:listInventsByStockID};   console.log('viewListInvents.html pageAfterIn app.data.viewListInvents 2=',app.data.viewListInvents);
-                        cInstance.$setState({
-                            listStocks:listStocks,
-                            listInvents:listInventsByStockID
-                        });
-                }, 1000);
-            },
-            f2:function(dataItemName,dataValue){
-                return dataValue;
             },
             viewListInventsStockClosed:function(e){
                 this.loadListInventsData();
             }
         },
         on: {
-            pageAfterIn: function(e, page) {                                                             console.log('viewListInvents.html pageAfterIn', page, this);
+            pageAfterIn: function(e, page) {                                                             //console.log('viewListInvents.html pageAfterIn', page, this);
                 let app=page.app, cInstance=this;
                 if(app.data.viewListInvents) return
                 cInstance.loadListInventsData();
