@@ -174,7 +174,6 @@
             workingDoc:null
         }),
         mainView = app7.views.create('.view-main', {url: '/',domCache:true});//Init/Create main view
-
     if (typeof(Storage)!=="undefined") {
         let username=localStorage.getItem("login-username");
         if(username&&username.toString().trim()!="")$$('#mobInv-login-screen #login-username').val(username);
@@ -207,7 +206,11 @@
                     if(data&&data.error){
                         if(data.userErrorMsg)msg+='<br>'+data.userErrorMsg;else msg+="<br>"+data.error;
                     }
-                    app7.dialog.alert(msg,"Внимание",function(){
+                    if(app7.srvRequestJSONDialogErr){
+                        app7.srvRequestJSONDialogErr.open(); return;
+                    }
+                    app7.srvRequestJSONDialogErr=app7.dialog.alert(msg,"Внимание",function(){
+                        app7.srvRequestJSONDialogErr=null;
                         callback(null,(data)?data.error:null);
                     });
                     return;
@@ -224,7 +227,11 @@
                         "<br>или доступ по указанному адресу сервера запрещен.";
                 } else
                     msg="Не удалось установить связь с сервером по указанному адресу.";
-                app7.dialog.alert(msg,"Внимание",function(){
+                if(app7.srvRequestJSONDialogErr){
+                    app7.srvRequestJSONDialogErr.open(); return;
+                }
+                app7.srvRequestJSONDialogErr=app7.dialog.alert(msg,"Внимание",function(){
+                    app7.srvRequestJSONDialogErr=null;
                     callback(undefined,err);
                 });
             });
@@ -249,9 +256,12 @@
                     else msg="Вход на сервер неудался!<br>"+data.error;
                 } else
                     msg="Вход на сервер неудался!";
-                app7.dialog.alert(msg,"Внимание", function(){
-                    $$('#mobInv-login-screen #login-username').val("");
-                    $$('#mobInv-login-screen #login-password').val("");
+                if(app7.loginDialogErr){
+                    app7.loginDialogErr.open(); return;
+                }
+                app7.loginDialogErr=app7.dialog.alert(msg,"Внимание", function(){
+                    app7.loginDialogErr=null;
+                    $$('#mobInv-login-screen #login-password').val("").focus();
                 });
             },function(err,e){                                                                              console.log('/login error',err,e);
                 var state=err.status, msg='';
@@ -260,7 +270,13 @@
                             "<br>или доступ по указанному адресу сервера запрещен.";
                 } else
                     msg="Не удалось установить связь с сервером по указанному адресу.";
-                app7.dialog.alert(msg,"Внимание");
+                if(app7.loginDialogErr){
+                    app7.loginDialogErr.open(); return;
+                }
+                app7.loginDialogErr=app7.dialog.alert(msg,"Внимание", function(){
+                    app7.loginDialogErr=null;
+                    $$('#mobInv-login-screen #login-password').val("").focus();
+                });
             });
     };
     $$('#mobInv-login-screen #login-button').on('click', function () {
