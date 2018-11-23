@@ -67,8 +67,7 @@
             return {item:inventData,items:[]};
         },
         methods: {
-            createTableRow: function(inventProdData){                                                   //console.log('viewInvent.html createTableRow prodData=',prodData, this);
-                var app7=this.$app;
+            createTableRow: function(inventProdData){                                                   console.log('viewInvent.html createTableRow inventProdData=',inventProdData, this);
                 if(!inventProdData) inventProdData={};
                 let mainTable=document.getElementById('inventoryTable'),
                     trHigher=document.createElement('tr'),
@@ -98,12 +97,13 @@
                     thisInstance.showRealQtyFunction(tdReal, tdProdName.innerText, tdReal.innerText.trim());
                 };
                 tdReal.onclick=tdRef.onclick;tdReal.doSelect=tdRowNum.onclick;
-                let tSrcPosID=inventProdData["TSrcPosID"];
-                if(tSrcPosID>this.maxTSrcPosID)this.maxTSrcPosID=tSrcPosID;
-                tdRowNum.innerText=tSrcPosID.toString();
+                tdRowNum.innerText=inventProdData["TSrcPosID"];
                 tdProdName.innerText=inventProdData["ProdName"];
-                tdBarCode.innerText=inventProdData["Barcode"]; tdUm.innerText=inventProdData["UM"]; tdRef.innerText=inventProdData["TQty"]; tdReal.innerText=inventProdData["TNewQty"];
-                tdReal.id='prodBarcode_'+tdBarCode.innerText;tdReal.trHigherOffsetTop=trHigher.offsetTop;
+                tdBarCode.innerText=inventProdData["Barcode"]; tdUm.innerText=inventProdData["UM"];
+                tdRef.innerText=inventProdData["TQty"]; tdReal.innerText=inventProdData["TNewQty"];
+                tdReal.ChID=inventProdData["ChID"];tdReal.TSrcPosID=tdRowNum.innerText;tdReal.id=tdReal.ChID+'_'+tdReal.TSrcPosID;
+                tdReal.TQty=tdRef.innerText;
+                tdReal.trHigherOffsetTop=trHigher.offsetTop;
                 $$('.clickedTableRow').removeClass('clickedTableRow');
                 trHigher.classList.add('clickedTableRow');trLower.classList.add('clickedTableRow');
                 $$('#pageContentInventory').scrollTop(tdReal.trHigherOffsetTop,100);
@@ -165,22 +165,102 @@
             //     document.getElementById("totalDocQty").innerHTML=totalrefQty;
             //     document.getElementById("totalRealQty").innerHTML=totalrealQty;
             // },
-            addProdToTable:function(prodData,addTNewQty){
-                var app7=this.$app;
+            addProdToTable:function(prodData){
                 if(!prodData) prodData={TQty:0,TNewQty:0};
                 var existstdReal=document.getElementById('prodBarcode_'+prodData["Barcode"]);
                 if(existstdReal){
-                    existstdReal.innerText=parseInt(existstdReal.innerText)+addTNewQty;
+                    let oldTNewQty=parseInt(existstdReal.innerText), tNewQty=prodData["TNewQty"],
+                        oldTQty=parseInt(existstdReal.TQty), tQty=prodData["TQty"];
+                    existstdReal.innerText=tNewQty; existstdReal.TQty=tQty;
                     $$('.clickedTableRow').removeClass('clickedTableRow');
                     existstdReal.doSelect();
                     $$('#pageContentInventory').scrollTop(existstdReal.trHigherOffsetTop,10);
-                    this.setTotalInfo(0,addTNewQty);
+                    this.setTotalInfo(tQty-oldTQty,tNewQty-oldTNewQty);
                     return;
                 }
-                this.maxTSrcPosID++; prodData["TSrcPosID"]=this.maxTSrcPosID;
-                prodData["TQty"]=0;prodData["TNewQty"]=0+addTNewQty;
                 prodData.tableTDReal= this.createTableRow(prodData);
-                return prodData;
+            },
+
+            // /**
+            //  * callback = function(prodData,err)
+            //  */
+            // getProdData: function(barcode,callback) {                                                      //console.log('viewInvent.html getProdData barcode=',barcode, this);
+            //     if(!barcode||barcode.toString().trim()==''){
+            //         var self=this;
+            //         if(!this.dialogAlertNoBarcode)
+            //             this.dialogAlertNoBarcode=
+            //                 app7.dialog.alert("Не удалось считать штрихкод", "Внимание",function(){
+            //                     self.dialogAlertNoBarcode=null;
+            //                     callback(null);
+            //                 });
+            //         else
+            //             this.dialogAlertNoBarcode.open();
+            //         return;
+            //     }
+            //     let cInstance=this, app=this.$app;                                                      console.log('viewInvent.html getProdData barcode=',barcode, this);
+            //     app.preloader.show();
+            //     app.srvRequestJSON({url:'/dirsProds/getProdDataByCRUniInput',conditions:{'value':barcode}},
+            //         function(result,error){
+            //             app.preloader.hide();// Hide Preloader
+            //             if(!result||!result.item){
+            //                 let errMsg='Не удалось получить данные товара с сервера!';
+            //                 if(result&&result.error)
+            //                     if(result.userErrorMsg)errMsg+='<br>'+result.userErrorMsg;else errMsg+='<br>'+result.error;
+            //                 app7.dialog.alert(errMsg, "Внимание",function(){
+            //                     callback(null);
+            //                 });
+            //                 return;
+            //             }
+            //             let prodData=result.item;
+            //             callback(prodData);
+            //         })
+            // },
+            /**
+             * callback = function(prodData,err)
+             */
+            storeInputValueToInvent:function(inputValue,callback){
+                if(!inputValue||inputValue.toString().trim()==''){
+                    var self=this;
+                    if(!this.dialogAlertNoBarcode)
+                        this.dialogAlertNoBarcode=
+                            app7.dialog.alert("Не удалось считать штрихкод или код товара!","Внимание",function(){
+                                self.dialogAlertNoBarcode=null;
+                                callback(null);
+                            });
+                    else
+                        this.dialogAlertNoBarcode.open();
+                    return;
+                }
+                let cInstance=this;                                                                     console.log('viewInvent.html storeInputValueToInvent inputValue=',inputValue, this);
+                app7.preloader.show();
+                app7.srvPostRequestJSON({url:'/mobile/ven/storeProdDataByCRUniInput',data:{'value':inputValue},
+                        errorDialogMsg:"Не удалось получить данные товара с сервера!"},
+                    function(result,error){
+                        app7.preloader.hide();// Hide Preloader
+                        if(!result||!result.resultItem){
+                            callback(null);
+                            return;
+                        }
+                        let inventProdData=result.resultItem;//prodData["TQty"]=0;prodData["TNewQty"]=1;
+                        callback(inventProdData);
+                    })
+
+                // app7.srvRequestJSON({url:'/dirsProds/getProdDataByCRUniInput',conditions:{'value':inputValue}},
+                //     function(result,error){
+                //         app7.preloader.hide();// Hide Preloader
+                //         if(!result||!result.item){
+                //             let errMsg='Не удалось получить данные товара с сервера!';
+                //             if(result&&result.error)
+                //                 if(result.userErrorMsg)errMsg+='<br>'+result.userErrorMsg;else errMsg+='<br>'+result.error;
+                //             app7.dialog.alert(errMsg, "Внимание",function(){
+                //                 callback(null);
+                //             });
+                //             return;
+                //         }
+                //         let prodData=result.item;prodData["TQty"]=0;prodData["TNewQty"]=1;
+                //         callback(prodData);
+                //     })
+
             },
 
             disableInputProdBarcode:function(disable){
@@ -192,52 +272,17 @@
                 $$('#barCodeInput').removeAttr('disabled');
                 $$('#buttonBarcodeInputEnter').removeAttr('disabled');
             },
-
-            /**
-             * callback = function(prodData,err)
-             */
-            getProdData: function(barcode,callback) {                                                      //console.log('viewInvent.html getProdData barcode=',barcode, this);
-                if(!barcode||barcode.toString().trim()==''){
-                    var self=this;
-                    if(!this.dialogAlertNoBarcode)
-                        this.dialogAlertNoBarcode=
-                            app7.dialog.alert("Не удалось считать штрихкод", "Внимание",function(){
-                                self.dialogAlertNoBarcode=null;
-                                callback(null);
-                            });
-                    else
-                        this.dialogAlertNoBarcode.open();
-                    return;
-                }
-                let cInstance=this, app=this.$app;                                                      console.log('viewInvent.html getProdData barcode=',barcode, this);
-                app.preloader.show();
-                app.srvRequestJSON({url:'/dirsProds/getProdDataByCRUniInput',conditions:{'value':barcode}},
-                    function(result,error){
-                        app.preloader.hide();// Hide Preloader
-                        if(!result||!result.item){
-                            let errMsg='Не удалось получить данные товара с сервера!';
-                            if(result&&result.error)
-                                if(result.userErrorMsg)errMsg+='<br>'+result.userErrorMsg;else errMsg+='<br>'+result.error;
-                            app7.dialog.alert(errMsg, "Внимание",function(){
-                                callback(null);
-                            });
-                            return;
-                        }
-                        let prodData=result.item;
-                        callback(prodData);
-                    })
-            },
             barcodeInputEnter: function () {
                 this.disableInputProdBarcode();
                 var self=this;
-                this.getProdData($$("#barCodeInput").val(),function(prodData){
-                    if(!prodData){
+                this.storeInputValueToInvent($$("#barCodeInput").val(),function(inventProdData){
+                    if(!inventProdData){
                         document.getElementById("barCodeInput").value='';
                         self.disableInputProdBarcode(false);
                         $$("#barCodeInput").focus();
                         return;
-                    };
-                    self.addProdToTable(prodData,1);
+                    }
+                    self.addProdToTable(inventProdData);
                     document.getElementById("barCodeInput").value='';
                     self.disableInputProdBarcode(false);
                     $$("#barCodeInput").focus();
@@ -253,9 +298,10 @@
                 let cInstance=this, app=this.$app;                                                      console.log('viewInvent.html loadInventData inventChID=',inventChID, this);
                 cInstance.disableInputProdBarcode();
                 app.preloader.show();
-                app.srvRequestJSON({url:'/mobile/ven/getDataForVenATable',conditions:{'ParentChID=':inventChID}},
+                app.srvRequestJSON({url:'/mobile/ven/getDataForVenATable',conditions:{'ParentChID=':inventChID},
+                        errorDialogMsg:"Не удалось получить список товаров инвентаризации с сервера!"},
                     function(result,error){
-                        app.preloader.hide();// Hide Preloader
+                        app.preloader.hide();
                         if(!result){
                             cInstance.disableInputProdBarcode(false);
                             return;
@@ -297,22 +343,15 @@
                     app.progressbar.set(progressBarEl, progress);
                     self.fillInventTableProgress(ind+1,inventData,progressBarEl,progress,progressStep,finishedCallback)
                 },10)
-            },
+            }
         },
         on: {
             pageInit: function(e, page) {                                                               //console.log('viewInvent.html pageInit', page, this);
-                this.maxTSrcPosID=0;
                 document.getElementById("totalDocQty").innerHTML=0;
                 document.getElementById("totalRealQty").innerHTML=0;
                 this.loadInventData();
             },
             pageBeforeIn: function(e, page) {                                                           //console.log('viewInvent.html pageBeforeIn', page);
-                // $$("#app").prop("data-workingDoc", "inventory");
-                //$$("#app").addClass("inventory");
-                //$$(document).workingDoc="";
-                //$$('#barCodeInput').on('blur', '#barCodeInput', function(e){
-                //  $$(e.target).focus();
-                //});
                 let maxWidth=document.getElementById("tableWithFixedHead").clientWidth+1+'px';
                 document.getElementById("inventoryTable").style.marginTop=(document.getElementById("tableFixedHeader").offsetHeight)  +'px';
                 document.getElementById("totalRowQty").style.width=(document.getElementById('num_td').offsetWidth-11) + "px";

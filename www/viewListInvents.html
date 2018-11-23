@@ -69,7 +69,8 @@
                 let cInstance=this, app=this.$app,
                     stockID=$$('#viewListInvents-stock').val();
                 app.preloader.show();
-                app.srvRequestJSON({url:'/mobile/ven/getDataForVensList',conditions:(stockID=='')?{'StockID>':0}:{'StockID=':stockID}},
+                app.srvRequestJSON({url:'/mobile/ven/getDataForVensList',conditions:(stockID=='')?{'StockID>':0}:{'StockID=':stockID},
+                        errorDialogMsg:"Не удалось получить список инвентаризаций с сервера!"},
                     function(result,error){
                         app.preloader.hide();// Hide Preloader
                         if(!result)return;
