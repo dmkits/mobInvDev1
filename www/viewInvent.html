@@ -52,7 +52,7 @@
 </template>
 <script>
     return {
-        data: function data() {                                                                         console.log('viewInvent.html data',this.$route.params);
+        data: function data() {                                                                         //console.log('viewInvent.html data',this.$route.params);
             let inventData={},listInventsData=this.$app.data.viewListInvents.listInvents;
             if(!this.$route.params) return inventData;
             let inventChID=this.$route.params.inventChID;
@@ -67,7 +67,7 @@
             return {item:inventData,items:[]};
         },
         methods: {
-            createTableRow: function(inventProdData){                                          //console.log('viewInvent.html createTableRow prodData=',prodData, this);
+            createTableRow: function(inventProdData){                                                   //console.log('viewInvent.html createTableRow prodData=',prodData, this);
                 var app7=this.$app;
                 if(!inventProdData) inventProdData={};
                 let mainTable=document.getElementById('inventoryTable'),
@@ -112,21 +112,39 @@
             },
             showRealQtyFunction: function(cell, prodName, displayedQty){
                 let app7=this.$app, thisInstance=this,
-                    realQtyDialog=app7.dialog.create({ title: 'Фактический остаток', destroyOnClose:true,
-                        content:'<br><input id="inputRealQty" type="number" style="text-align:center;border:1px solid grey;padding:5px" value="'+displayedQty+'"></<input>',
-                        text:prodName,
+                    realQtyDialog=app7.dialog.create({ title: 'Фактический остаток', destroyOnClose:true, text:prodName,
+                        content:'<br><input id="inputRealQty" type="number" style="text-align:center;border:1px solid grey;padding:5px"></<input>',
                         on:{
                             open:function(){
-                                document.getElementById("inputRealQty").focus();
+                                $$("#inputRealQty").val(displayedQty).focus();document.getElementById("inputRealQty").select();
+                                document.getElementById("inputRealQty").onkeydown=function(e){ //console.log('e',e);
+                                    if(e.key=="Escape"||e.code=="Escape"||e.keyCode==27) {
+                                        realQtyDialog.close();
+                                    }else if(e.key=="Enter"||e.code=="Enter"||e.keyCode==13) {
+                                        let val=parseInt($$("#inputRealQty").val());
+                                        if(isNaN(val)){
+                                            $$("#inputRealQty").focus();document.getElementById("inputRealQty").select();
+                                            return;
+                                        }
+                                        cell.innerText=val;
+                                        thisInstance.setTotalInfo(0,val-parseInt(displayedQty));
+                                        realQtyDialog.close();
+                                    }
+                                };
                             },
                         },
-                        buttons:[{ text:"ОТМЕНА",onClick:function(){ realQtyDialog.close(); } },
-                            { text:"ВВОД",keyCodes:[13],onClick:function(){
-                                    cell.innerText=document.getElementById("inputRealQty").value.trim() || 0;
-                                    thisInstance.setTotalInfo(0,parseInt(cell.innerText)-parseInt(displayedQty));
-                                    realQtyDialog.close();
-                                } } ]
-                    }).open();
+                        buttons:[{ text:"ОТМЕНА",close:true,keyCodes:[27],onClick:function(){ $$("#barCodeInput").focus(); } },
+                            { text:"ВВОД",close:false,keyCodes:[13],onClick:function(){
+                                let val=parseInt($$("#inputRealQty").val());
+                                if(isNaN(val)){
+                                    $$("#inputRealQty").focus();document.getElementById("inputRealQty").select();
+                                    return;
+                                }
+                                cell.innerText=val;
+                                thisInstance.setTotalInfo(0,val-parseInt(displayedQty));
+                                realQtyDialog.close();
+                            } } ]
+                    }).open().on("closed",function(){ $$("#barCodeInput").focus(); });
             },
             setTotalInfo: function(tQty,tNewQty){
                 document.getElementById("totalRowQty").innerHTML=this.items.length;
@@ -150,18 +168,6 @@
             addProdToTable:function(prodData,addTNewQty){
                 var app7=this.$app;
                 if(!prodData) prodData={TQty:0,TNewQty:0};
-                // if(!inventProdData){
-                //     if(!this.dialogAlertNoProd)
-                //         this.dialogAlertNoProd=
-                //             app7.dialog.alert("Не удалось получить данные товара", "Внимание",function(){
-                //                 self.dialogAlertNoProd=null;
-                //                 callback();
-                //             });
-                //     else
-                //         this.dialogAlertNoProd.open();
-                //     return;
-                // }
-
                 var existstdReal=document.getElementById('prodBarcode_'+prodData["Barcode"]);
                 if(existstdReal){
                     existstdReal.innerText=parseInt(existstdReal.innerText)+addTNewQty;
@@ -205,7 +211,7 @@
                 }
                 let cInstance=this, app=this.$app;                                                      console.log('viewInvent.html getProdData barcode=',barcode, this);
                 app.preloader.show();
-                app.srvRequestJSON({url:'/dirsProds/getProdDataByBarcode',conditions:{'Barcode=':barcode}},
+                app.srvRequestJSON({url:'/dirsProds/getProdDataByCRUniInput',conditions:{'value':barcode}},
                     function(result,error){
                         app.preloader.hide();// Hide Preloader
                         if(!result||!result.item){
@@ -259,6 +265,7 @@
                             item:inventData,items:result.items
                         });
                         cInstance.fillInventTable(result.items,function(){
+                            if(!cInstance.disableInputProdBarcode)return;
                             cInstance.disableInputProdBarcode(false);
                             $$("#barCodeInput").focus();
                         });
@@ -293,14 +300,14 @@
             },
         },
         on: {
-            pageInit: function(e, page) {                                                                   console.log('viewInvent.html pageInit', page, this);
+            pageInit: function(e, page) {                                                               //console.log('viewInvent.html pageInit', page, this);
                 this.maxTSrcPosID=0;
                 document.getElementById("totalDocQty").innerHTML=0;
                 document.getElementById("totalRealQty").innerHTML=0;
                 this.loadInventData();
             },
-            pageBeforeIn: function(e, page) {                                                                console.log('viewInvent.html pageBeforeIn', page);
-                $$("#app").prop("data-workingDoc", "inventory");
+            pageBeforeIn: function(e, page) {                                                           //console.log('viewInvent.html pageBeforeIn', page);
+                // $$("#app").prop("data-workingDoc", "inventory");
                 //$$("#app").addClass("inventory");
                 //$$(document).workingDoc="";
                 //$$('#barCodeInput').on('blur', '#barCodeInput', function(e){
@@ -312,13 +319,13 @@
                 document.getElementById("totalDocQty").style.width= (document.getElementById('doc_qty').offsetWidth-11) + "px";
                 document.getElementById("totalRealQty").style.width= (document.getElementById('real_qty').offsetWidth-11) + "px";
             },
-            pageAfterIn: function(e, page) {                                                                console.log('viewInvent.html pageAfterIn', page);
+            pageAfterIn: function(e, page) {                                                            //console.log('viewInvent.html pageAfterIn', page);
                 $$("#barCodeInput").focus();
             },
             // pageBeforeOut: function(e, page) {
             //     console.log('pageBeforeOut', page);
             // },
-            pageAfterOut: function(e, page) {                                                               console.log('viewInvent.html pageAfterOut', page);
+            pageAfterOut: function(e, page) {                                                           //console.log('viewInvent.html pageAfterOut', page);
                 if(this.progressBarEl)this.$app.progressbar.hide(this.progressBarEl); //hide
             },
         }
