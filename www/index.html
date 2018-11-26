@@ -40,9 +40,9 @@
                         <li>
                             <a href="/settingsServerURI/" class="panel-close">Сервер</a>
                         </li>
-                        <!--<li>-->
-                            <!--<a href="/action-sheet/" class="panel-close">Action Sheet</a>-->
-                        <!--</li>-->
+                        <li>
+                            <a href="/home/" class="panel-close">Вход</a>
+                        </li>
                         <!--<li>-->
                             <!--<a href="/badge/" class="panel-close">Badge</a>-->
                         <!--</li>-->
@@ -74,7 +74,7 @@
         </div>
     </div>
     <div class="view view-main"><!-- Your main view, should have "view-main" class -->
-        <div class="page" data-page="login"><!-- Page, data-name contains page name which can be used in callbacks -->
+        <div class="page" data-name="home"><!-- Page, data-name contains page name which can be used in callbacks -->
             <div class="navbar"><!-- Top Navbar -->
                 <div class="navbar-inner">
                     <div class="left">
@@ -164,16 +164,22 @@
             root: '#app', // app7 root element
             theme: 'auto', // Automatic theme detection
             routes: [//-- App routes --
-                { path: '/', url: './index.html' },
+                { path: '/home', pageName: 'home',
+                    options:{/*reloadAll:true,*/clearPreviousHistory:true,ignoreCache:true},
+                    on: {
+                        pageAfterIn: function (e, page) {                                                       console.log('pageAfterIn');
+                            app7.data.viewListInvents=null;
+                        }
+                    }
+                },
                 { path: '/settingsServerURI/', componentUrl: './settingsServerURI.html'},//,options:{reloadAll:true},
                 { path: '/viewListInvents/', componentUrl: './viewListInvents.html'},
                 { path: '/viewInvent/:inventChID', componentUrl: './viewInvent.html'},//,options:{reloadAll:true},
-                //
                 { path: '(.*)', url: './pages/404.html' }// Default route (404 page). MUST BE THE LAST
             ],
             workingDoc:null
         }),
-        mainView = app7.views.create('.view-main', {url: '/',domCache:true});//Init/Create main view
+        mainView = app7.views.create('.view-main', {url: '/',domCache:true, stackPages:true });//Init/Create main view
     if (typeof(Storage)!=="undefined") {
         let username=localStorage.getItem("login-username");
         if(username&&username.toString().trim()!="")$$('#mobInv-login-screen #login-username').val(username);
@@ -238,54 +244,52 @@
             });
     };
     /**
-     * params = { url, data, timeout, showRequestErrorDialog, errorDialogMsg }
+     * params = { url, data, timeout, showRequestErrorDialog, userErrorMsg }
      * default: params.showRequestErrorDialog = true
-     * resultCallback = function(result, error)
+     * resultCallback = function(result, errorMessage)
      *  result = undefined if request failed
-     *  result = null if result is empty or result error (parameter error exists)
-     *  result = response result
+     *  result = response result if request success
+     *  errorMessage exists if request failed or response result contains error
      */
     app7.srvPostRequestJSON=function(params,callback){
         if(!params)return;
         this.request.postJSON(app7.data['serverURI']+params.url,params.data,
-            function(data){                                                                             console.log('app7.srvPostRequestJSON',app7.data['serverURI']+params.url,'success data=',data);
-                if(data==undefined||data==null||data.error!==undefined){
-                    if(params.showRequestErrorDialog==false){
-                        callback(null,(data)?data.error:null);
-                        return;
+            function(result){                                                                           console.log('app7.srvPostRequestJSON',app7.data['serverURI']+params.url,'success data=',result);
+                if(result==undefined||result==null||result.error!==undefined){
+                    let errMsg=(!params.userErrorMsg)?'Не удалось получить результат операции с сервера!':params.userErrorMsg;
+                    if(result&&result.error){
+                        if(result.userErrorMsg)errMsg+='<br>'+result.userErrorMsg;else errMsg+="<br>"+result.error;
                     }
-                    let msg=(!params.errorDialogMsg)?'Не удалось получить результат операции с сервера!':params.errorDialogMsg;
-                    if(data&&data.error){
-                        if(data.userErrorMsg)msg+='<br>'+data.userErrorMsg;else msg+="<br>"+data.error;
+                    if(params.showRequestErrorDialog==false){
+                        callback(result,errMsg); return;
                     }
                     if(app7.srvRequestJSONDialogErr){
                         app7.srvRequestJSONDialogErr.open(); return;
                     }
-                    app7.srvRequestJSONDialogErr=app7.dialog.alert(msg,"Внимание",function(){
+                    app7.srvRequestJSONDialogErr=app7.dialog.alert(errMsg,"Внимание",function(){
                         app7.srvRequestJSONDialogErr=null;
-                        callback(null,(data)?data.error:null);
+                        callback(null,errMsg);
                     });
                     return;
                 }
-                callback(data);
+                callback(result);
             },function(err,e){                                                                          console.log('app7.srvPostRequestJSON',app7.data['serverURI']+params.url,'error err=',err);
-                if(params.showRequestErrorDialog==false){
-                    callback(undefined,err);
-                    return;
-                }
                 let state=err.status,
-                    msg=(!params.errorDialogMsg)?'Не удалось получить результат операции с сервера!':params.errorDialogMsg;
+                    errMsg=(!params.userErrorMsg)?'Не удалось получить результат операции с сервера!':params.userErrorMsg;
                 if(state===0){
-                    msg+="<br>Неправильный или недействительный адрес сервера"+
-                            "<br>или доступ по указанному адресу сервера запрещен.";
+                    errMsg+="<br>Неправильный или недействительный адрес сервера"+
+                        "<br>или доступ по указанному адресу сервера запрещен.";
                 } else
-                    msg+="<br>Не удалось установить связь с сервером по указанному адресу.";
+                    errMsg+="<br>Не удалось установить связь с сервером по указанному адресу.";
+                if(params.showRequestErrorDialog==false){
+                    callback(undefined,errMsg); return;
+                }
                 if(app7.srvRequestJSONDialogErr){
                     app7.srvRequestJSONDialogErr.open(); return;
                 }
-                app7.srvRequestJSONDialogErr=app7.dialog.alert(msg,"Внимание",function(){
+                app7.srvRequestJSONDialogErr=app7.dialog.alert(errMsg,"Внимание",function(){
                     app7.srvRequestJSONDialogErr=null;
-                    callback(undefined,err);
+                    callback(undefined,errMsg);
                 });
             });
     };
@@ -293,11 +297,10 @@
     app7.loginProcess=function(){
         let username = $$('#mobInv-login-screen #login-username').val(),
             password = $$('#mobInv-login-screen #login-password').val();
-        this.srvPostRequestJSON({url:'/login', data:{user:username,pswrd:password},errorDialogMsg:"Вход на сервер неудался!"},
-            function(result,error){
+        this.srvPostRequestJSON({url:'/login', data:{user:username,pswrd:password},userErrorMsg:"Вход на сервер не удался!"},
+            function(result,errmsg){
                 if(!result||!result.uuid){
-                    $$('#mobInv-login-screen #login-password').val("").focus();
-                    return;
+                    $$('#mobInv-login-screen #login-password').val("").focus(); return;
                 }
                 app7.data.uuid=result.uuid;
                 app7.request.setup({ headers: {'uuid':result.uuid} });

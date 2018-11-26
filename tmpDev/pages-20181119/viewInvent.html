@@ -135,7 +135,7 @@
                     tdRef=document.createElement('td'), tdReal=document.createElement('td'), thisInstance=this;
                 tdReal.id=barcode;
                 tbody.onclick=  function(){
-                    thisInstance.showRealQtyFunction(tdReal, tdReal.innerText.trim(),tdProdName.innerText);
+                    thisInstance.showRealQtyDialog(tdReal, tdReal.innerText.trim(),tdProdName.innerText);
                     if(document.getElementById('clickedTableRow')) document.getElementById('clickedTableRow').id="";
                     tbody.id="clickedTableRow";
                 };
@@ -167,7 +167,7 @@
                 document.getElementById("totalDocQty").innerHTML=totalrefQty;
                 document.getElementById("totalRealQty").innerHTML=totalrealQty;
             },
-            showRealQtyFunction: function(cell, displayedQty, prodName){
+            showRealQtyDialog: function(cell, displayedQty, prodName){
                 // var input='<br><input id="inputRealQty" type="number" style="text-align:center; border: 1px solid grey; padding: 5px" value="'+displayedQty+'"></<input>';
                 var app7=this.$app;
                 let thisInstance=this,
